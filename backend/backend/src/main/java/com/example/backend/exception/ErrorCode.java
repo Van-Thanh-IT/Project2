@@ -8,6 +8,9 @@ public enum ErrorCode {
     USER_INVALID_INPUT(1003, "Dữ liệu người dùng không hợp lệ", HttpStatus.BAD_REQUEST),
     USER_DISABLED(1004, "Tài khoản bị khoá", HttpStatus.FORBIDDEN),
     USER_EMAIL_NOT_VERIFIED(1005, "Email chưa được xác thực", HttpStatus.FORBIDDEN),
+    USER_EMAIL_EXISTED(1006, "Email đã tồn tại", HttpStatus.CONFLICT),
+    USER_PHONE_EXISTED(1007, "Số điện thoại đã được sử dụng", HttpStatus.CONFLICT),
+    USER_PASSWORD_NOT_MATCH(108, "Mật khẩu không khớp, vui lòng nhập lại", HttpStatus.BAD_REQUEST),
 
 
     // --------- Auth / Security (2xxx) ---------

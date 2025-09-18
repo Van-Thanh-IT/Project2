@@ -1,4 +1,4 @@
 package com.example.backend.dto.response;
 
-public class UserResponse {
+public class ProductResponse {
 }

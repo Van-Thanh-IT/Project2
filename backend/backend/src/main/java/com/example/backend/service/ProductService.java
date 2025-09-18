@@ -1,6 +1,8 @@
 package com.example.backend.service;
-import org.springframework.stereotype.Service;
-@Service
-public class UserService {
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+@RequiredArgsConstructor
+@Service
+public class ProductService {
 }

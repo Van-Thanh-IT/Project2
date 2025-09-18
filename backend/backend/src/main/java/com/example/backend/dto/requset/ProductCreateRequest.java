@@ -1,4 +1,4 @@
 package com.example.backend.dto.requset;
 
-public class UserCreateRequest {
+public class ProductCreateRequest {
 }
