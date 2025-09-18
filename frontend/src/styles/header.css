@@ -1,0 +1,10 @@
+
+.header_logo{
+    display: flex;
+    justify-content: space-between;
+}
+nav a{
+    &:hover{
+        background-color: red;
+    }
+}

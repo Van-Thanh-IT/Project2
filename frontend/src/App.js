@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import logo from "./logo.svg";
 import "./App.css";
 import ProductCard from "./productCard";
@@ -17,6 +18,14 @@ function App() {
         </div> */}
         <ProductCard></ProductCard>
       </header>
+=======
+import AppRouter from "./routes/AppRouter";
+function App() {
+  return (
+    <div className="App">
+      
+       <AppRouter/>
+>>>>>>> 3a714881f3745353d5d8640737400ca7dd0b7aec
     </div>
   );
 }
