@@ -2,6 +2,7 @@ import React from "react";
 import "../../styles/header.css";
 import { Link } from "react-router-dom";
 function Header() {
+
   return (
     <header style={{ padding: "20px", background: "#f2f2f2" }}>
         <div className="header_logo">
