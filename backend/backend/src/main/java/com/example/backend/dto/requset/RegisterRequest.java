@@ -30,9 +30,11 @@ public class RegisterRequest {
     String password;
 
     @NotBlank(message = "Vui lòng nhập lại mật khẩu!")
-    private String confirmPassword;
+    String confirmPassword;
 
     @NotBlank(message = "Số điện thoại không được để trống!")
     @Pattern(regexp = "^(0[0-9]{9,10})$", message = "Số điện thoại không hợp lệ!")
     String phone;
+
+    boolean isActive;
 }

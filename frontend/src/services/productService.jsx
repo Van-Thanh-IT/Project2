@@ -1,45 +1,33 @@
 import axiosClient from "./axiosClient";
-//http://localhost:8080/api/admin/read,create,update/{id},is_active/{id}
-export const getAllProducts = async () => {
-  const res = await axiosClient.get("read");
+
+//get home
+export const getAllHomeProducts = async () => {
+  const res = await axiosClient.get("/home/products/read");
   return res.data;
 };
 
-export const createProduct = async (data) => {
-  const res = await axiosClient.post("product/create", data, {
-    headers: {
-      "Content-Type": undefined, // ✅ Cho phép Axios tự set multipart/form-data
-    },
-  });
+// get product
+export const getAllProducts = async () =>{
+   const res = await axiosClient.get("/admin/products/read")
+   return res.data;
+}
+
+//create product
+export const createProducts = async (formData) =>{
+  console.log("dl nhận đc: ",formData );
+  const res = await axiosClient.post("/admin/products/create/", formData);
+  return res.data;
+}
+
+// update product
+export const updateProduct = async (productId, formData) => {
+  console.log("dl nhận đc: ",formData );
+  const res = await axiosClient.put(`/admin/products/update/${productId}`, formData);
   return res.data;
 };
 
-export const updateProduct = async (id, data) => {
-  const res = await axiosClient.post(`product/update/${id}`, data, {
-    headers: {
-      "Content-Type": undefined,
-    },
-  });
+// delet soft
+export const deleteProduct = async (productId, isActive) =>{
+  const res = await axiosClient.put(`/admin/products/deletesoft/${productId}`, isActive);
   return res.data;
-};
-
-export const deleteProduct = async (id) => {
-  const res = await axiosClient.delete(`product/delete/${id}`);
-  return res.data;
-};
-
-export const toggleProductStatus = async (id, status) => {
-  const res = await axiosClient.put(`product/status/${id}`, { status });
-  return res.data;
-};
-
-export const totalProduct = async () => {
-  const res = await axiosClient.get("product/total");
-  return res.data;
-};
-
-export const getProductDetails = async (id) => {
-  console.log("ID: ", id);
-  const res = await axiosClient.get(`product/details/${id}`);
-  return res.data;
-};
+}

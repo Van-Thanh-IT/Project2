@@ -1,6 +1,5 @@
 package com.example.backend.repository;
 
-import com.example.backend.dto.requset.RegisterRequest;
 import com.example.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,6 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByPhone(String phone);
     // Tìm user theo email
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByFullName(String fullName);
 
 
 

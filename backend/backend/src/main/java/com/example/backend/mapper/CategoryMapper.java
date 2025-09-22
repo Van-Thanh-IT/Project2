@@ -10,6 +10,8 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
+    // search categoriname
+
     Category toCategory(CategoryRequest request);
     @Mapping(target = "parentId", expression = "java(category.getParent() != null ? category.getParent().getCategoryId() : null)")
     default CategoryResponse toCategoryResponseWithChildren(Category category) {

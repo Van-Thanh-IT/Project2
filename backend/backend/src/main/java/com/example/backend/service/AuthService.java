@@ -1,6 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.config.JwtProperties;
+import com.example.backend.util.JwtProperties;
 import com.example.backend.dto.requset.AuthenticationRequest;
 import com.example.backend.dto.requset.RegisterRequest;
 import com.example.backend.dto.response.AuthenticationResponse;
@@ -18,11 +18,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -38,7 +35,6 @@ public class AuthService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     UserMapper userMapper;
-
     //key
     JwtProperties jwtProperties;
 
@@ -73,18 +69,20 @@ public class AuthService {
         roles.setRoleName(RoleName.USER.name());
         user.setRoles(new HashSet<>(
                 Set.of(defaultRole)));
+
+        user.setIsActive(true);
         userRepository.save(user);
     }
 
     // Hàm đăng nhập
     public AuthenticationResponse login(AuthenticationRequest request){
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException("Email hoặc mật khẩu không đúng!,"));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if(!authenticated){
-            throw new RuntimeException("Email hoặc mật khẩu không đúng, vui lòng thử lại!");
+            throw new RuntimeException("Email hoặc mật khẩu không đúng!");
         }
 
         var token = generateToken(user);

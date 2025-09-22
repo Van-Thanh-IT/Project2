@@ -1,10 +1,12 @@
 package com.example.backend.service;
 
+import com.example.backend.util.SlugUtil;
 import com.example.backend.dto.requset.CategoryRequest;
 import com.example.backend.dto.response.CategoryResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.mapper.CategoryMapper;
 import com.example.backend.repository.CategoryRepository;
+import com.example.backend.util.FileUploadUtil;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +14,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.text.Normalizer;
 import java.util.List;
-import java.util.Locale;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -22,7 +22,10 @@ import java.util.Locale;
 public class CategoryService {
     CategoryRepository categoryRepository;
 
+    SlugUtil slugUtil;
     CategoryMapper categoryMapper;
+
+    FileUploadUtil fileUploadUtil;
 
     // lấy tất cả danh mục
     public List<CategoryResponse> getAllCategories() {
@@ -30,17 +33,7 @@ public class CategoryService {
         return categories.stream().map(categoryMapper::toCategoryResponseWithChildren).toList();
 
     }
-    // 🔹 Sinh slug từ tên
-     String generateSlug(String name) {
-        // Chuyển tiếng Việt có dấu thành không dấu
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        String slug = normalized.replaceAll("\\p{M}", "") // loại bỏ dấu
-                .replaceAll("([a-z])([A-Z])", "$1-$2") // chèn '-' trước chữ hoa
-                .toLowerCase()
-                .replaceAll("[^a-z0-9\\s-]", "") // loại bỏ ký tự đặc biệt
-                .replaceAll("\\s+", "-"); // thay khoảng trắng bằng '-'
-        return slug;
-    }
+
     //Tạo danh mục
     @Transactional
     public Category createCategory(CategoryRequest request) {
@@ -48,12 +41,15 @@ public class CategoryService {
             throw new RuntimeException("Tên danh mục đã tồn tại!");
         }
 
-        String slug = generateSlug(request.getCategoryName());
+        String slug = slugUtil.generateSlug(request.getCategoryName());
         if (categoryRepository.existsBySlug(slug)) {
             throw new RuntimeException("Tên slug đã tồn tại!");
         }
 
         Category category = categoryMapper.toCategory(request);
+
+        String imageUrl = fileUploadUtil.saveFile(request.getImage());
+        category.setImageUrl(imageUrl);
         category.setSlug(slug);
         Integer maxSortOrder = categoryRepository.findMaxSortOrder();
         category.setSortOrder((maxSortOrder != null ? maxSortOrder : 0) + 1);
@@ -82,16 +78,21 @@ public class CategoryService {
         }
 
         // Sinh slug mới từ tên mới
-        String slug = generateSlug(request.getCategoryName());
+        String slug = slugUtil.generateSlug(request.getCategoryName());
         if (!category.getSlug().equals(slug) &&
                 categoryRepository.existsBySlug(slug)) {
             throw new RuntimeException("Slug đã tồn tại!");
         }
 
+        //Upload ảnh tái sử dụng
+        String imageUrl = fileUploadUtil.saveFile(request.getImage());
+        category.setImageUrl(imageUrl);
+
         // Cập nhật thông tin
         category.setCategoryName(request.getCategoryName());
         category.setSlug(slug);
-        category.setSortOrder(request.getSortOrder());
+        Integer maxSortOrder = categoryRepository.findMaxSortOrder();
+        category.setSortOrder((maxSortOrder != null ? maxSortOrder : 0) + 1);
 
         // Cập nhật cha nếu có
         if (request.getParentId() != null) {

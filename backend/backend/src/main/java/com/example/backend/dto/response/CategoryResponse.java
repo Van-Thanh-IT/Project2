@@ -2,7 +2,6 @@ package com.example.backend.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,5 +21,5 @@ public class CategoryResponse {
     String imageUrl;
     LocalDateTime createdAt;
 
-    private List<CategoryResponse> children;
+    List<CategoryResponse> children;
 }

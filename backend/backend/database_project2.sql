@@ -59,6 +59,44 @@ CREATE TABLE products (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );
+select * from products p ;
+
+INSERT INTO products (product_name, description, price, material, brand, category_id, slug, is_active)
+VALUES
+('Ghế Sofa Da', 'Ghế sofa da cao cấp, êm ái', 5500000, 'Da', 'Nội Thất Việt', 1, 'ghe-sofa-da', TRUE),
+('Bàn Ăn Gỗ Sồi', 'Bàn ăn gỗ sồi tự nhiên, sang trọng', 4200000, 'Gỗ sồi', 'Nội Thất Việt', 2, 'ban-an-go-soi', TRUE),
+('Đèn Bàn Trang Trí', 'Đèn bàn hiện đại cho phòng khách', 850000, 'Kim loại & Thủy tinh', 'LightHome', 3, 'den-ban-trang-tri', TRUE),
+('Tủ Quần Áo 4 Cánh', 'Tủ quần áo gỗ MDF, nhiều ngăn', 3200000, 'Gỗ MDF', 'Nội Thất Việt', 1, 'tu-quan-ao-4-canh', TRUE),
+('Giường Ngủ King Size', 'Giường ngủ king size êm ái', 7600000, 'Gỗ tự nhiên', 'Nội Thất Việt', 2, 'giuong-ngu-king-size', TRUE),
+('Bàn Làm Việc Hiện Đại', 'Bàn làm việc gọn nhẹ, hiện đại', 1500000, 'Gỗ MDF', 'WorkSpace', 2, 'ban-lam-viec-hien-dai', TRUE),
+('Ghế Văn Phòng Ergonomic', 'Ghế văn phòng chống mỏi lưng', 1900000, 'Vải & Kim loại', 'WorkSpace', 2, 'ghe-van-phong-ergonomic', TRUE),
+('Tủ Giày Thông Minh', 'Tủ giày nhiều ngăn, tiết kiệm không gian', 1200000, 'Gỗ MDF', 'Nội Thất Việt', 1, 'tu-giay-thong-minh', TRUE),
+('Đèn Treo Trần Phòng Khách', 'Đèn trang trí hiện đại, LED', 2500000, 'Kim loại & Thủy tinh', 'LightHome', 3, 'den-treo-tran-phong-khach', TRUE),
+('Bàn Cà Phê Gỗ', 'Bàn cà phê gỗ tự nhiên, sang trọng', 1300000, 'Gỗ tự nhiên', 'Nội Thất Việt', 2, 'ban-ca-phe-go', TRUE);
+
+CREATE TABLE product_images (
+    image_id INT PRIMARY KEY AUTO_INCREMENT,
+    product_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    is_primary BOOLEAN DEFAULT FALSE, -- ảnh chính hay không
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
+);
+
+INSERT INTO product_images (product_id, image_url, is_primary)
+VALUES
+(1, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(2, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(3, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(4, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(5, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(6, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(7, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(8, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(9, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE),
+(10, 'https://www.bing.com/th/id/OIP.2j35kJKcwvuVGTN5xOtNIgHaEr?w=245&h=211&c=8&rs=1&qlt=70&o=7&cb=thws5&dpr=2.6&pid=3.1&rm=3', TRUE);
+
+
 
 CREATE TABLE product_variants (
     variant_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -70,6 +108,10 @@ CREATE TABLE product_variants (
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
+
+
+
+
 
 CREATE TABLE carts (
     cart_id INT PRIMARY KEY AUTO_INCREMENT,

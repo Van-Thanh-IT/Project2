@@ -1,5 +1,6 @@
 package com.example.backend.dto.response;
 
+import com.example.backend.entity.User;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

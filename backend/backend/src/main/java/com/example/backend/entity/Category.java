@@ -3,6 +3,7 @@ package com.example.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,14 +29,6 @@ public class Category{
     @Column(nullable = false, unique = true, length = 150)
     String slug;
 
-    // Quan hệ tự tham chiếu (danh mục cha - con)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
-    List<Category> children;
-
     @Column(name = "sort_order")
     Integer sortOrder = 0;
 
@@ -47,4 +40,12 @@ public class Category{
 
     @Column(name = "created_at", updatable = false, insertable = false)
     LocalDateTime createdAt;
+
+    // Quan hệ tự tham chiếu (danh mục cha - con)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    Category parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    List<Category> children;
 }

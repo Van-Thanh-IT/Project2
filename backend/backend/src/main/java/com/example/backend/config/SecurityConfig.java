@@ -1,10 +1,10 @@
 package com.example.backend.config;
 
 import com.example.backend.enums.RoleName;
+import com.example.backend.util.JwtProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,8 +15,13 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.spec.SecretKeySpec;
+import java.util.List;
+
 @RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
@@ -27,14 +32,21 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, CustomExceptionHandler exceptionHandler) throws Exception {
          httpSecurity
+                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // bật CORS cho Spring Security
                  .csrf(csr -> csr.disable())
                  .authorizeHttpRequests(auth -> auth
-                         .requestMatchers("/api/auth/**").permitAll()
-                         .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
+
+                         .requestMatchers("/api/home/**", "/api/auth/**",  "/uploads/**" ).permitAll() // public
                          .requestMatchers("/api/admin/**").hasRole(RoleName.ADMIN.name())
+                        .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
                          .anyRequest().authenticated())
+
+                 .exceptionHandling(ex -> ex
+                         .accessDeniedHandler(exceptionHandler.accessDeniedHandler())
+                         .authenticationEntryPoint(exceptionHandler.authenticationEntryPoint())
+                 )
                  .oauth2ResourceServer(auth2-> auth2
                          .jwt(jwt->jwt
                                  .decoder(jwtDecoder())
@@ -62,6 +74,19 @@ public class SecurityConfig {
                 .withSecretKey(secretKey)
                 .macAlgorithm(MacAlgorithm.HS512)
                 .build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001"));
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 }

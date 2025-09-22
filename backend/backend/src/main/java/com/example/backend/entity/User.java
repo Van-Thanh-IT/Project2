@@ -21,25 +21,25 @@ public class User {
      @Column(name = "user_id")
      Integer userId;
 
+     @Column(name = "full_name", nullable = false)
+     String fullName;
+
      @Column(name = "email", nullable = false, unique = true)
      String email;
 
      @Column(name = "password_hash", nullable = false)
      String password;
 
-     @Column(name = "full_name", nullable = false)
-     String fullName;
-
      @Column(name = "phone")
      String phone;
 
      @Column(name = "is_active")
-     Boolean isActive = true;
+     Boolean isActive;
 
      @Column(name = "created_at", insertable = false, updatable = false)
-     private LocalDateTime createdAt;
+     LocalDateTime createdAt;
 
-     @ManyToMany(fetch = FetchType.EAGER)
+     @ManyToMany(fetch = FetchType.LAZY)
      @JoinTable(
              name = "user_roles",
              joinColumns = @JoinColumn(name = "user_id"),

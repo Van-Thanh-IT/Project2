@@ -1,52 +1,56 @@
 package com.example.backend.entity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-//@Data
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Builder
-//@Entity
-//@Table(name = "products")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "products")
 public class Product {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "product_id")
-//    private Long productId;
-//
-//    @Column(name = "product_name",nullable = false, length = 255)
-//    private String productName;
-//
-//    @Column(columnDefinition = "TEXT")
-//    private String description;
-//
-//    @Column(nullable = false, precision = 12, scale = 2)
-//    private Double price;
-//
-//    private String material;
-//    private String brand;
-//
-//    @Column(nullable = false, unique = true, length = 150)
-//    private String slug;
-//
-//    private Boolean isActive = true;
-//
-//    @Column(updatable = false, insertable = false)
-//    private LocalDateTime createdAt;
-//
-//    // QUAN HỆ VỚI Category (nếu có entity Category)
-//    @ManyToOne
-//    @JoinColumn(name = "category_id")
-//    private Category category;
-//
-//    // QUAN HỆ 1-nhiều với ProductVariant
-//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<ProductVariant> variants;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "product_id")
+    Long productId;
 
-    // getter/setter
+    @Column(name = "product_name",nullable = false, length = 255)
+    String productName;
+
+    @Column(columnDefinition = "TEXT")
+    String description;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
+
+    String material;
+    String brand;
+
+    @Column(nullable = false, unique = true, length = 150)
+    String slug;
+
+    Boolean isActive;
+
+    @Column(updatable = false, insertable = false)
+    LocalDateTime createdAt;
+
+    // QUAN HỆ VỚI Category (nếu có entity Category)
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    Category category;
+
+    // QUAN HỆ 1-nhiều với ProductVariant
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<ProductVariant> variants;
+
+    // QUAN HỆ 1-nhiều với Product_Images
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    List<Product_Images> images = new ArrayList<>();
+
+
 }
