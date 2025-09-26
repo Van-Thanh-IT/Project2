@@ -1,10 +1,7 @@
 package com.example.backend.dto.response;
-
-import com.example.backend.entity.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.HashSet;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -18,6 +15,7 @@ public class UserResponse {
     String email;
     String phone;
     boolean isActive;
+    LocalDateTime createdAt;
      Set<RoleResponse> roles;
 
 }

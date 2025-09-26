@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
+import HomeIntro from "./HomeIntro";
 
 const UserMainLayout = () => {
   return (
@@ -9,6 +10,7 @@ const UserMainLayout = () => {
       <Header />
       <main>
         <Outlet />
+        <HomeIntro/>
       </main>
       <Footer />
     </>

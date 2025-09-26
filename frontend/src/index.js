@@ -10,17 +10,6 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 // Bootstrap JS (dropdown, modal…)
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
-
-// Kiểm tra token khi app load
-const token = localStorage.getItem("token");
-if (token) {
-  const decoded = jwtDecode(token);
-  const now = Date.now() / 1000;
-  if (decoded.exp < now) {
-    localStorage.removeItem("token"); // token hết hạn → remove
-  }
-}
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

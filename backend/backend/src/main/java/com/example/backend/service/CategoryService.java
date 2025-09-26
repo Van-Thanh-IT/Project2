@@ -76,15 +76,16 @@ public class CategoryService {
                 categoryRepository.existsByCategoryName(request.getCategoryName())) {
             throw new RuntimeException("Tên danh mục đã tồn tại!");
         }
-
         // Sinh slug mới từ tên mới
         String slug = slugUtil.generateSlug(request.getCategoryName());
         if (!category.getSlug().equals(slug) &&
                 categoryRepository.existsBySlug(slug)) {
             throw new RuntimeException("Slug đã tồn tại!");
         }
+        //xóa file cũ khi update
+        fileUploadUtil.deleteFile(category.getImageUrl());
 
-        //Upload ảnh tái sử dụng
+        //Upload ảnh
         String imageUrl = fileUploadUtil.saveFile(request.getImage());
         category.setImageUrl(imageUrl);
 

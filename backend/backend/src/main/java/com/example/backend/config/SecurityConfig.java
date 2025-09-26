@@ -40,7 +40,7 @@ public class SecurityConfig {
 
                          .requestMatchers("/api/home/**", "/api/auth/**",  "/uploads/**" ).permitAll() // public
                          .requestMatchers("/api/admin/**").hasRole(RoleName.ADMIN.name())
-                        .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")
+                        .requestMatchers("/api/users/**").hasAnyRole(RoleName.USER.name(),RoleName.ADMIN.name())
                          .anyRequest().authenticated())
 
                  .exceptionHandling(ex -> ex

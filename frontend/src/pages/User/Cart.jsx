@@ -1,7 +1,9 @@
+
 function Cart(){
     return(
         <div>
-            Hihi
+        <h1 className=" text-danger">Giỏ hàng</h1>
+           
         </div>
     );
 }

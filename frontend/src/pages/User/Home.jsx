@@ -9,6 +9,7 @@ import img3 from "../../assets/images/img3.jpg";
 
 function Home() {
   const [products, setProducts] = useState([]);
+  console.log(products);
 
   useEffect(() => {
     const fetchProducts = async () => {

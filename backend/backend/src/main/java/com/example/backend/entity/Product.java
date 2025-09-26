@@ -50,7 +50,7 @@ public class Product {
 
     // QUAN HỆ 1-nhiều với Product_Images
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Product_Images> images = new ArrayList<>();
+    List<ProductImage> images = new ArrayList<>();
 
 
 }

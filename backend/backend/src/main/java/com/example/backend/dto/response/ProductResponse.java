@@ -24,15 +24,11 @@ public class ProductResponse {
     String slug;
     Boolean isActive;
     LocalDateTime createdAt;
-
-    // Category (có thể chỉ lấy id + name)
     Long categoryId;
-    String categoryName;
-
     // Danh sách ảnh
-    List<ImageResponse> images;
-
-    // Danh sách biến thể
-    List<ProductVariantResponse> variants;
+    List<ProductImageResponse> images;
+//
+//    // Danh sách biến thể
+//    List<ProductVariantResponse> variants;
 
 }

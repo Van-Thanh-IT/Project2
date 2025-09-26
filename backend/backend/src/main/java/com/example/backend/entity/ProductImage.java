@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Product_Images {
+@Table(name = "product_images")
+public class ProductImage{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "image_id")
@@ -24,7 +25,7 @@ public class Product_Images {
     String imageUrl;
 
     @Column(name = "is_primary")
-    Boolean is_Primary = false;
+    Boolean isPrimary = false;
 
     @Column(name = "created_at" ,updatable = false, insertable = false)
     LocalDateTime createdAt;
@@ -34,3 +35,4 @@ public class Product_Images {
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
 }
+

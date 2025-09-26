@@ -1,75 +1,83 @@
 import React, { useState, useEffect } from "react";
-import "../../../styles/header.css";
-import { Link } from "react-router-dom";
-import RegisterModal from "../../modal/RegisterModal";
-import LoginModal from "../../modal/LoginModal";
-import { Button } from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import { Navbar, Nav, NavDropdown, Container, Form, FormControl, Button, Badge } from "react-bootstrap";
+import { FaShoppingCart } from "react-icons/fa";
 
 function Header() {
-  const [showRegister, setShowRegister] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const navigate = useNavigate();
 
-  const openRegisterFromLogin = () => {
-    setShowLogin(false);
-    setShowRegister(true);
-  };
-
-  // Lắng nghe thay đổi token
   useEffect(() => {
-    const handleStorageChange = () => {
-      setIsLoggedIn(!!localStorage.getItem("token"));
-    };
-
-    window.addEventListener("storage", handleStorageChange);
+    const updateAuth = () => setIsLoggedIn(!!localStorage.getItem("token"));
+    window.addEventListener("storage", updateAuth);
+    window.addEventListener("login", updateAuth);
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("storage", updateAuth);
+      window.removeEventListener("login", updateAuth);
     };
   }, []);
 
-  // Hàm logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    navigate("/login");
   };
 
   return (
-    <header style={{ padding: "20px", background: "#f2f2f2" }}>
-      <div className="header_logo">
-        <Link to="/">Nội Thất</Link>
-        <form action="">
-          <input type="text" placeholder="Tìm kiếm sản phẩm..." />
-          <button type="submit">Tìm Kiếm</button>
-        </form>
-        <div>
-          <Link className="text-decoration-none text-dark fs-1 fw-bold p-1" to="/cart">Cart</Link>
-        </div>
-        <div className="acout_style">
-          {!isLoggedIn ? (
-            <>
-              <Button className="btn btn-success" onClick={() => setShowRegister(true)}>Register</Button>
-              <Button className="btn btn-primary ms-3" onClick={() => setShowLogin(true)}>Login</Button>
-            </>
-          ) : (
-            <Button className="btn btn-danger" onClick={handleLogout}>Logout</Button>
-          )}
-        </div>
-      </div>
+    <Navbar expand="lg" className="shadow-sm sticky-top" style={{ backgroundColor: "#111" }}>
+      <Container fluid className="d-flex align-items-center">
+        {/* Logo to góc trái */}
+        <Navbar.Brand as={Link} to="/" className="fw-bold fs-2 text-white me-4">
+          Nội Thất
+        </Navbar.Brand>
 
-      <nav style={{ display: "flex", gap: "15px" }}>
-        <Link className="text-decoration-none text-dark fs-5 fw-bold p-1" to="/">Home</Link>
-        <Link className="text-decoration-none text-dark fs-5 fw-bold p-1" to="/product">Product</Link>
-        <Link className="text-decoration-none text-dark fs-5 fw-bold p-1" to="/desgin">Desgin</Link>
-        <Link className="text-decoration-none text-dark fs-5 fw-bold p-1" to="/contact">Contact</Link>
-        {isLoggedIn && (
-          <Link className="text-decoration-none text-dark fs-5 fw-bold p-1" to="/profile">Profile</Link>
-        )}
-      </nav>
+        {/* Menu nav ở giữa */}
+        <Nav className="me-auto align-items-center">
+          <Nav.Link as={Link} to="/" className="fw-bold text-white">Trang chủ</Nav.Link>
+          <NavDropdown title={<span className="fw-bold text-white">Sản phẩm</span>} id="basic-nav-dropdown">
+            <NavDropdown.Item as={Link} to="/product">Tất cả sản phẩm</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/product/kfrgvs">Phòng Khách</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/product/bedroom">Phòng Ngủ</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/product/phong-bep">Phòng Bếp</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/product/nha-tam">Nhà Tắm</NavDropdown.Item>
+          </NavDropdown>
+          <Nav.Link as={Link} to="/desgin" className="fw-bold text-white">Thiết kế</Nav.Link>
+          <Nav.Link as={Link} to="/contact" className="fw-bold text-white">Liên hệ</Nav.Link>
+          {isLoggedIn && <Nav.Link as={Link} to="/profile" className="fw-bold text-white">Trang cá nhân</Nav.Link>}
+        </Nav>
 
-      {/* Render modal */}
-      <RegisterModal show={showRegister} handleClose={() => setShowRegister(false)} />
-      <LoginModal show={showLogin} handleClose={() => setShowLogin(false)} openRegister={openRegisterFromLogin} setIsLoggedIn={setIsLoggedIn} />
-    </header>
+        {/* Search dài và cụm giỏ hàng + login/register/logout ở góc phải */}
+        <div className="d-flex align-items-center ms-3">
+          <Form className="d-flex me-5 ">
+            <FormControl
+              type="search"
+              placeholder="Tìm kiếm sản phẩm..."
+              className="me-2 bg-white text-black"
+              style={{width:"400px"}}
+            />
+            <Button variant="primary">Tìm</Button>
+          </Form>
+
+          <Nav className="align-items-center">
+            <Nav.Link as={Link} to="/cart" className="position-relative text-white me-3">
+              <FaShoppingCart size={25} />
+              <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">
+                0
+              </Badge>
+            </Nav.Link>
+
+            {!isLoggedIn ? (
+              <>
+                <Button as={Link} to="/register" variant="success" className="me-2 fw-bold">Register</Button>
+                <Button as={Link} to="/login" variant="primary" className="fw-bold">Login</Button>
+              </>
+            ) : (
+              <Button variant="danger" onClick={handleLogout} className="fw-bold">Logout</Button>
+            )}
+          </Nav>
+        </div>
+      </Container>
+    </Navbar>
   );
 }
 

@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -33,8 +34,8 @@ public class User {
      @Column(name = "phone")
      String phone;
 
-     @Column(name = "is_active")
-     Boolean isActive;
+     @Column(name = "is_active", nullable = false)
+     Boolean isActive = true;
 
      @Column(name = "created_at", insertable = false, updatable = false)
      LocalDateTime createdAt;
@@ -46,5 +47,8 @@ public class User {
              inverseJoinColumns = @JoinColumn(name = "role_id")
      )
      Set<Role> roles = new HashSet<>();
+
+     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+     List<Order> orders;
 
 }

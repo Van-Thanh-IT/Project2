@@ -1,8 +1,8 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.requset.UserRequest;
 import com.example.backend.util.JwtProperties;
 import com.example.backend.dto.requset.AuthenticationRequest;
-import com.example.backend.dto.requset.RegisterRequest;
 import com.example.backend.dto.response.AuthenticationResponse;
 import com.example.backend.entity.Role;
 import com.example.backend.entity.User;
@@ -39,7 +39,7 @@ public class AuthService {
     JwtProperties jwtProperties;
 
     // Hàm đăng ký
-    public void register(RegisterRequest request) {
+    public void register(UserRequest request) {
 
         // Check email đã tồn tại hay chưa
         if(userRepository.existsByEmail(request.getEmail())){

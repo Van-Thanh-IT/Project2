@@ -8,7 +8,7 @@ const ProductModal = ({
   formData,
   handleChange,
   editingProduct,
-  categories, // danh mục truyền từ parent
+  categories,
 }) => {
   return (
     <Modal show={show} onHide={onHide}>

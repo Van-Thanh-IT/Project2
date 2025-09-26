@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Form, Container, Modal } from "react-bootstrap";
+import { Table, Button, Container} from "react-bootstrap";
 import {
   getAllCategories,
   createCategory,
@@ -7,6 +7,8 @@ import {
   toggleCategoryStatus,
 } from "../../services/CategoryService";
 import CategoryModal from "../../components/modal/CategoryModal";
+import { toast } from "react-toastify";
+import "../../styles/global.scss";
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -25,9 +27,9 @@ const CategoryManagement = () => {
   const loadCategories = async () => {
     try {
       const data = await getAllCategories();
-      console.log(data);
       setCategories(data);
     } catch (error) {
+      toast.error("Không thể tải danh mục!");
       console.error("Lỗi load categories:", error);
     }
   };
@@ -54,8 +56,10 @@ const CategoryManagement = () => {
     try {
       if (editingCategory) {
         await updateCategory(editingCategory.categoryId, formData);
+        toast.success("Cập nhật danh mục thành công!");
       } else {
         await createCategory(formData);
+        toast.success("Thêm danh mục thành công!");
       }
 
       setForm({ categoryName: "", parentId: "", imageFile: null });
@@ -64,6 +68,7 @@ const CategoryManagement = () => {
       await loadCategories();
     } catch (error) {
       console.error("Lỗi khi submit:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi lưu danh mục!");
     }
   };
 
@@ -79,83 +84,42 @@ const CategoryManagement = () => {
 
   const handleToggleStatus = async (category) => {
     try {
-      await toggleCategoryStatus(category.categoryId, {
-        isActive: !category.isActive,
-      });
+      const res = await toggleCategoryStatus(category.categoryId, { isActive: !category.isActive });
+      toast.success(res.messages);
+     
       await loadCategories();
     } catch (error) {
-      console.error("Lỗi khi đổi trạng thái:", error);
+      console.error(error);
+      toast.error(error.response?.data?.messages);
     }
   };
-
   return (
-    <Container className="mt-4">
+   <Container className="mt-4">
       <h2 className="mb-3">Quản lý Danh mục</h2>
-
-      <Button
-        variant="success"
-        className="mb-3"
-        onClick={() => {
-          setEditingCategory(null);
-          setForm({ categoryName: "", parentId: "", imageFile: null });
-          setShowModal(true);
-        }}>Thêm danh mục</Button>
-
+      <Button variant="success" className="mb-3" onClick={() => { setEditingCategory(null); setForm({ categoryName: "", parentId: "", imageFile: null }); setShowModal(true); }}>Thêm danh mục</Button>
       <div style={{ maxHeight: "500px", overflowY: "auto" }}>
-        <Table striped bordered hover>
-          <thead className="table-dark">
+        <Table striped bordered hover className="table-dark">
+          <thead >
             <tr>
-              <th  style={{ position: "sticky", top: 0, backgroundColor: "#343a40", zIndex: 1 }}>ID</th>
-              <th style={{ position: "sticky", top: 0, backgroundColor: "#343a40", zIndex: 1 }}>Tên danh mục</th>
-              <th style={{ position: "sticky", top: 0, backgroundColor: "#343a40", zIndex: 1 }}>Danh mục cha</th>
-              <th style={{ position: "sticky", top: 0, backgroundColor: "#343a40", zIndex: 1 }}>Ảnh</th>
-              <th style={{ position: "sticky", top: 0, backgroundColor: "#343a40", zIndex: 1 }}>Trạng thái</th>
-              <th style={{ position: "sticky", top: 0, backgroundColor: "#343a40", zIndex: 1 }}>Hành động</th>
-          
+              <th>ID</th>
+              <th>Tên danh mục</th>
+              <th>Danh mục cha & con</th>
+              <th>Ảnh</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {categories.map((c) => (
+            {categories.map(c => (
               <tr key={c.categoryId}>
                 <td>{c.categoryId}</td>
                 <td>{c.categoryName}</td>
+                <td>{c.parentId ? categories.find(p => p.categoryId === c.parentId)?.categoryName : "Danh mục cha"}</td>
+                <td>{c.imageUrl && <img src={`http://localhost:8080${c.imageUrl}`} alt={c.categoryName} style={{ width: "50px", height: "50px", objectFit: "cover" }} />}</td>
+                <td>{c.isActive ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-secondary">Ẩn</span>}</td>
                 <td>
-                  {c.parentId
-                    ? categories.find((p) => p.categoryId === c.parentId)?.categoryName
-                    : "-"}
-                </td>
-                <td>
-                  {c.imageUrl && (
-                    <img
-                      src={`http://localhost:8080${c.imageUrl}`}
-                      alt={c.categoryName}
-                      style={{ width: "50px", height: "50px", objectFit: "cover" }}
-                    />
-                  )}
-                </td>
-                <td>
-                  {c.isActive ? (
-                    <span className="badge bg-success">Hoạt động</span>
-                  ) : (
-                    <span className="badge bg-secondary">Ẩn</span>
-                  )}
-                </td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    className="me-2"
-                    onClick={() => handleEdit(c)}
-                  >
-                    Sửa
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={c.isActive ? "warning" : "success"}
-                    onClick={() => handleToggleStatus(c)}
-                  >
-                    {c.isActive ? "Ẩn" : "Hiện"}
-                  </Button>
+                  <Button size="sm" variant="primary" className="me-2" onClick={() => handleEdit(c)}>Sửa</Button>
+                  <Button size="sm" variant={c.isActive ? "warning" : "success"} onClick={() => handleToggleStatus(c)}>{c.isActive ? "Ẩn" : "Hiện"}</Button>
                 </td>
               </tr>
             ))}
@@ -163,17 +127,7 @@ const CategoryManagement = () => {
         </Table>
       </div>
 
-      {/* modal */}
-      <CategoryModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        onSubmit={handleSubmit}
-        form={form}
-        handleChange={handleChange}
-        editingCategory={editingCategory}
-        categories={categories}
-        />
-
+      <CategoryModal show={showModal} onHide={() => setShowModal(false)} onSubmit={handleSubmit} form={form} handleChange={handleChange} editingCategory={editingCategory} categories={categories} />
     </Container>
   );
 };

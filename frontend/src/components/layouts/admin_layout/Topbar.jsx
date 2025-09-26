@@ -42,7 +42,7 @@ const Topbar = () => {
       {message && <h1 className="bg-danger text-white text-center mb-2">{message}</h1>}
       <div className="container-fluid justify-content-end">
         <div className="d-flex align-items-center">
-          {user && <span className="me-2 fw-semibold">{user.fullName}</span>}
+          {user && <span className="me-2 fw-semibold">Xin chào: {user.fullName}</span>}
         </div>
       </div>
     </nav>

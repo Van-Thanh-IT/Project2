@@ -2,12 +2,13 @@ import React from "react";
 import { Card, Button } from "react-bootstrap";
 
 function ProductCard({ product }) {
-  let imageUrl = product?.images[0]?.imageUrl;
+  const imageUrl = product?.images?.[0]?.imageUrl || "/default.png"; 
+  
   return (
     <Card className="shadow-sm border-0 rounded-3 h-100">
       <Card.Img
         variant="top"
-        src={imageUrl}
+        src={`http://localhost:8080/${product.imageUrl}`}
         alt={product.productName}
         style={{ height: "200px", objectFit: "cover" }}
       />

@@ -12,10 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RegisterRequest {
+public class UserRequest {
     @NotBlank(message = "Họ tên người dùng không được để trống!")
     @Size(min = 8, message = "Họ tên phải có ít nhất 8 ký tự!")
     @Size(max = 30, message = "Họ tên không quá 30 ký tự")

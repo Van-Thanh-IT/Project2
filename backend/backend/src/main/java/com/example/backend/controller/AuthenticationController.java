@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.requset.AuthenticationRequest;
-import com.example.backend.dto.requset.RegisterRequest;
+import com.example.backend.dto.requset.UserRequest;
 import com.example.backend.dto.response.APIResponse;
 import com.example.backend.dto.response.AuthenticationResponse;
 import com.example.backend.service.AuthService;
@@ -23,8 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
     AuthService authService;
     @PostMapping("/register")
-    public APIResponse<?> register(@RequestBody @Valid RegisterRequest request){
-        System.out.println("Dl nhận đc: " + request);
+    public APIResponse<?> register(@RequestBody @Valid UserRequest request){
         APIResponse<?> response = new APIResponse();
         response.setCode(200);
         response.setMessages("Đăng ký thành công!");
