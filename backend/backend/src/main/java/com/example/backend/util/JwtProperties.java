@@ -1,17 +1,15 @@
 package com.example.backend.util;
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "jwt")
+@Data
 public class JwtProperties {
     private String secret;
     private Integer expiration;
 
-    // getters & setters
-    public String getSecret() { return secret; }
-    public void setSecret(String secret) { this.secret = secret; }
+    private String googleClientId;
 
-    public Integer getExpiration() { return expiration; }
-    public void setExpiration(Integer expiration) { this.expiration = expiration; }
 }

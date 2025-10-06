@@ -17,5 +17,8 @@ public class UserResponse {
     boolean isActive;
     LocalDateTime createdAt;
      Set<RoleResponse> roles;
-
+     String facebookId;
+    String googleId;
+    String provider;
+    LocalDateTime lastLogin;
 }

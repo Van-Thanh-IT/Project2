@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderRequest {
-    Integer userId; // nếu khách đã đăng nhập
+    Long userId; // nếu khách đã đăng nhập
     String code;
     Double subtotal;
     Double shippingFee;

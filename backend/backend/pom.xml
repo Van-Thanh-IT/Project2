@@ -102,6 +102,29 @@
 			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
 		</dependency>
 
+		<!-- Thư viện API Client -->
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>2.7.0</version> <!-- hoặc mới nhất -->
+		</dependency>
+
+		<!-- Thư viện OAuth Client -->
+		<dependency>
+			<groupId>com.google.http-client</groupId>
+			<artifactId>google-http-client-jackson2</artifactId>
+			<version>1.43.3</version> <!-- bản ổn định, phù hợp với Boot 3 -->
+		</dependency>
+
+		<!--Thư viện Facebook Graph API Client -->
+		<dependency>
+			<groupId>com.restfb</groupId>
+			<artifactId>restfb</artifactId>
+			<version>2024.1.0</version>
+		</dependency>
+
+
+
 	</dependencies>
 
 	<build>

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 @Entity
@@ -29,7 +30,9 @@ public class Shipment {
     ShipmentStatus status = ShipmentStatus.PREPARING;
 
     @Column(nullable = false)
+    @CreationTimestamp
     LocalDateTime shippedAt;
+
     LocalDateTime deliveredAt;
 
 }

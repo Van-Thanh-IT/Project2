@@ -14,14 +14,6 @@ const Profile = () => {
   const [showOrdersModal, setShowOrdersModal] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    if(window.confirm("Bạn có muốn đăng xuất không?")) return;
-    localStorage.removeItem("token");
-    window.dispatchEvent(new Event("login"));
-    toast.info("Bạn đã đăng xuất!");
-    navigate("/login");
-  };
-
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -31,7 +23,7 @@ const Profile = () => {
 
         if (!res.data.active) {
           toast.error("Tài khoản của bạn đã bị khóa!");
-          handleLogout();
+          navigate("/login");
           return;
         }
 
@@ -43,7 +35,7 @@ const Profile = () => {
           setMessages("");
         }
       } catch (error) {
-        handleLogout(); // tự động logout nếu token hết hạn
+        navigate("/login"); // tự động redirect nếu token hết hạn
       } finally {
         setLoading(false);
       }
@@ -117,7 +109,6 @@ const Profile = () => {
         {/* Nút hành động */}
         <div className="d-flex gap-2 mt-3">
           <Button variant="primary" onClick={handleViewOrders}>Xem đơn hàng</Button>
-          <Button variant="danger" onClick={handleLogout}>Đăng xuất</Button>
         </div>
       </div>
 

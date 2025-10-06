@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class ShipmentRequest {
     String carrier;
     String trackingNumber;
-    String status; // preparing, shipped, delivered, returned
+    String status;
     LocalDateTime shippedAt;
     LocalDateTime deliveredAt;
 }

@@ -1,0 +1,10 @@
+.table td, .table th {
+  vertical-align: middle; /* căn giữa theo chiều dọc */
+  white-space: nowrap;     /* giữ nút trên 1 dòng nếu muốn */
+}
+
+th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

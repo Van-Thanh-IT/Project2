@@ -20,7 +20,7 @@ public class User {
      @Id
      @GeneratedValue(strategy = GenerationType.IDENTITY)
      @Column(name = "user_id")
-     Integer userId;
+     Long userId;
 
      @Column(name = "full_name", nullable = false)
      String fullName;
@@ -39,6 +39,17 @@ public class User {
 
      @Column(name = "created_at", insertable = false, updatable = false)
      LocalDateTime createdAt;
+
+     @Column(name = "facebook_id", unique = true)
+     String facebookId;
+     @Column(name = "google_id", unique = true)
+     String googleId;
+
+     @Column(name = "provider", nullable = false)
+     String provider = "local";
+
+     @Column(name = "last_login")
+     LocalDateTime lastLogin;
 
      @ManyToMany(fetch = FetchType.LAZY)
      @JoinTable(

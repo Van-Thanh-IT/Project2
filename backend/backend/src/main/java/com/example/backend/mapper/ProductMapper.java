@@ -26,4 +26,5 @@ public interface ProductMapper {
     ProductImageResponse toProductImageResponse(ProductImage productImage);
 
     ProductVariantResponse toProductVariantResponse(ProductVariant productVariant);
+
 }

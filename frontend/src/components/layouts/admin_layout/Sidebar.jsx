@@ -39,13 +39,25 @@ const Sidebar = () => {
 
   return (
     <div className="d-flex flex-column bg-dark text-white p-3" style={{ width: 250, minHeight: "100vh" }}>
+     <div
+      className="d-flex flex-column bg-dark text-white p-3"
+      style={{
+        width: 250,
+        height: "100vh", 
+        position: "fixed",  
+        top: 0,           
+        left: 0, 
+        overflowY: "auto"
+        }}>
       <h4 className="text-center mb-4">Admin</h4>
       <ul className="nav nav-pills flex-column gap-2">
         {menuItems.map((item, index) => (
           <li className="nav-item" key={index}>
             <Link
               to={item.path}
-              className={`nav-link d-flex align-items-center gap-2 ${isActive(item.path) ? "active" : "text-white"}`}
+              className={`nav-link d-flex align-items-center gap-2 ${
+                isActive(item.path) ? "active" : "text-white"
+              }`}
             >
               {item.icon} <span>{item.name}</span>
             </Link>
@@ -61,6 +73,8 @@ const Sidebar = () => {
           </button>
         </li>
       </ul>
+    </div>
+
     </div>
   );
 };

@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItemResponse {
@@ -11,6 +13,6 @@ public class OrderItemResponse {
     String productName;
     String variantColor;
     String variantSize;
-    Double price;
+    BigDecimal price;
     Integer quantity;
 }

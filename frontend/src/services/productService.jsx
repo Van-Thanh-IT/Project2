@@ -1,16 +1,12 @@
 import axiosClient from "./axiosClient";
 
+
 // Lấy tất cả sản phẩm
 export const getAllProducts = async () => {
   const res = await axiosClient.get("/admin/products/read");
   return res.data;
 };
 
-// Lấy sản phẩm cho trang home
-export const getAllHomeProducts = async () => {
-  const res = await axiosClient.get("/home/products/read");
-  return res.data;
-};
 
 // Tạo sản phẩm
 export const createProduct = async (productData) => {

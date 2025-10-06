@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Container } from "react-bootstrap";
+import { Table, Button, Container, Form } from "react-bootstrap";
 import { getAllProducts, createProduct, updateProduct, softDeleteProduct } from "../../services/productService";
 import { getAllCategories } from "../../services/CategoryService";
 import ProductModal from "../../components/modal/ProductModal";
@@ -8,6 +8,10 @@ import ProductVariantModal from "../../components/modal/ProductVariantModal";
 import { toast } from "react-toastify";
 
 function ProductManagement() {
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -33,6 +37,7 @@ function ProductManagement() {
     try {
       const product = await getAllProducts();
       setProducts(product.data);
+      setFilteredProducts(product.data);
     } catch (err) {
       console.error(err);
       toast.error("Không thể tải sản phẩm!");
@@ -122,11 +127,41 @@ function ProductManagement() {
   const handleCloseImageModal = () => { setShowImageModal(false); setSelectedProduct(null); };
   const handleShowVariantModal = (product) => { setSelectedProduct(product); setShowVariantModal(true); };
   const handleCloseVariantModal = () => { setShowVariantModal(false); setSelectedProduct(null); };
+  
 
+  const normalize = (str) =>
+  str?.toString().trim().replace(/\s+/g, " ").toLowerCase();
+
+  const handleSearch = (e) => {
+    const term = normalize(e.target.value);
+    setSearchTerm(e.target.value);
+
+    const filtered = products.filter((p) => {
+      const categoryName = categories.find(c => Number(c.categoryId) === Number(p.categoryId))?.categoryName || "";
+      return (
+        normalize(p.productName).includes(term) ||
+        normalize(p.brand).includes(term) ||
+        normalize(p.material).includes(term) ||
+        normalize(categoryName).includes(term)
+      );
+    });
+
+    setFilteredProducts(filtered);
+  };
   return (
-    <Container className="my-4">
+    <Container className="">
       <h2 className="mb-4">Quản lý sản phẩm</h2>
-      <Button className="mb-3" onClick={() => handleShowModal()}>Thêm sản phẩm</Button>
+      <div className="d-flex justify-content-between">
+        <Form.Control
+          type="text"
+          className="form-control mb-3 w-50"
+          placeholder="Tìm kiếm theo tên, thương hiệu, chất liệu, danh mục..."
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+        <Button className="mb-3" onClick={() => handleShowModal()}>Thêm sản phẩm</Button>
+      </div>
+ 
 
       <div style={{ maxHeight: "500px", overflowY: "auto" }}>
         <Table striped bordered hover  className="table-dark">
@@ -144,7 +179,7 @@ function ProductManagement() {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {filteredProducts.map((p) => (
               <tr key={p.productId}>
                 <td>{p.productId}</td>
                 <td>{p.productName}</td>

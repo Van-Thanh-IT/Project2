@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Modal, Badge, Stack } from "react-bootstrap";
+import { Table, Button, Modal, Badge, Stack, Form } from "react-bootstrap";
 import { 
   getAllOrders, 
   updateOrderStatus, 
@@ -14,6 +14,10 @@ const OrderManagement = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredOrders, setFilteredOrders] = useState([]);
+
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -22,6 +26,7 @@ const OrderManagement = () => {
     try {
       const res = await getAllOrders();
       setOrders(res.data);
+      setFilteredOrders(res.data)
     } catch (error) {
       console.error("Failed to fetch orders", error);
     }
@@ -103,11 +108,43 @@ const OrderManagement = () => {
     }
     };
 
+    const normalize = (str) => str?.toString().trim().replace(/\s+/g, " ").toLowerCase() || "";
+    const handleSearch = (e) => {
+  const term = normalize(e.target.value);
+    setSearchTerm(e.target.value);
+
+    const filtered = orders.filter(order => {
+      const userName = order.user?.fullName || order.fullName || "";
+      const status = order.status || "";
+      const code = order.code || "";
+
+      return (
+        normalize(userName).includes(term) ||
+        normalize(status).includes(term) ||
+        normalize(code).includes(term)
+      );
+    });
+
+    setFilteredOrders(filtered);
+  };
+
+
 
 
   return (
     <div className="container mt-4">
       <h3 className="mb-4">Quản lý đơn hàng</h3>
+       
+       <Form.Control
+        type="text" 
+        className="form-control mb-3 w-50" 
+        placeholder="Tìm kiếm theo mã đơn, người đặt, trạng thái..." 
+
+        value={searchTerm} 
+        onChange={handleSearch} 
+      />
+
+
       <div style={{ maxHeight: "550px", overflowY: "auto" }}>
         <Table  striped bordered hover className="table-dark">
         <thead>
@@ -121,7 +158,7 @@ const OrderManagement = () => {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <tr key={order.orderId}>
               <td>{order.code}</td>
               <td>{order.user?.fullName || order.fullName || "Khách vãng lai"}</td>

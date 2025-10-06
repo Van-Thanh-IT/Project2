@@ -1,22 +1,18 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.Inter.HomeProductProjection;
+import com.example.backend.dto.Inter.ProductReviewSummary;
 import com.example.backend.dto.requset.ProductImageRequest;
 import com.example.backend.dto.requset.ProductVariantRequest;
 import com.example.backend.dto.response.ProductImageResponse;
 import com.example.backend.dto.response.ProductVariantResponse;
-import com.example.backend.entity.ProductImage;
-import com.example.backend.entity.ProductVariant;
-import com.example.backend.repository.ProductImageRepository;
-import com.example.backend.repository.ProductVariantRepository;
+import com.example.backend.entity.*;
+import com.example.backend.repository.*;
 import com.example.backend.util.FileUploadUtil;
 import com.example.backend.util.SlugUtil;
 import com.example.backend.dto.requset.ProductRequest;
 import com.example.backend.dto.response.ProductResponse;
-import com.example.backend.entity.Category;
-import com.example.backend.entity.Product;
 import com.example.backend.mapper.ProductMapper;
-import com.example.backend.repository.CategoryRepository;
-import com.example.backend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,16 +29,51 @@ public class ProductService {
     ProductImageRepository productImageRepository;
     ProductVariantRepository productVariantRepository;
     CategoryRepository categoryRepository;
+    ReviewRepository reviewRepository;
+
+    InventoryRepository inventoryRepository;
+
     ProductMapper productMapper;
     SlugUtil slugUtil;
     FileUploadUtil fileUploadUtil;
 
+    // tìm kiếm sản phẩm
+    public List<HomeProductProjection> searchProducts(String keyword) {
+        return productRepository.searchProducts(keyword);
+    }
+
+    //tìm kiếm sp theo danh mục
+    public List<HomeProductProjection> getProductsByCategorySlug(String slug) {
+        return productRepository.findProductsByCategorySlug(slug);
+    }
+
+    // lấy dl đánh giá trung bình và lượt đánh giá
+    public List<ProductReviewSummary> getProductReviewSummary() {
+        return reviewRepository.findProductReviewSummary();
+    }
+
     // get home product
-    public List<ProductResponse> getHomeAllProducts() {
-        return productRepository.findByIsActiveTrue()
-                .stream()
-                .map(productMapper::toProductResponse)
-                .toList();
+    public List<HomeProductProjection> getHomeAllProducts() {
+        return productRepository.findAllActiveHomeProductsNative();
+
+    }
+    // get product detal slug
+    public ProductResponse getProductDetailBySlug(String slug){
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với slug: " + slug));
+
+        // map sang response (bao gồm images + variants)
+        ProductResponse response = productMapper.toProductResponse(product);
+
+        // lấy image
+        List<ProductImageResponse> images = getImagesByProductId(product.getProductId().longValue());
+        response.setImages(images);
+
+        // lấy variant
+        List<ProductVariantResponse> variants = getVariantByProductId(product.getProductId().longValue());
+        response.setVariants(variants);
+
+        return response;
     }
 
     // get products
@@ -180,6 +211,7 @@ public class ProductService {
     // Tạo variant cho product
     @Transactional
     public ProductVariant createProductVariant(Long productId, ProductVariantRequest request) {
+        // Lấy product theo ID
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm có productId: " + productId));
 
@@ -187,8 +219,17 @@ public class ProductService {
         variant.setProduct(product);
         variant.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
 
-        return productVariantRepository.save(variant);
+        ProductVariant savedVariant = productVariantRepository.save(variant);
+
+        Inventory inventory = new Inventory();
+        inventory.setVariant(savedVariant);
+        inventory.setQuantity(0);
+        inventory.setSafetyStock(10);
+        inventoryRepository.save(inventory);
+
+        return savedVariant;
     }
+
 
     // Cập nhật variant
     @Transactional

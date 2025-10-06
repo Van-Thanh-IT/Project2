@@ -1,13 +1,14 @@
 package com.example.backend.service;
 import com.example.backend.dto.requset.OrderRequest;
 import com.example.backend.dto.response.OrderResponse;
-import com.example.backend.entity.Order;
-import com.example.backend.entity.OrderItem;
-import com.example.backend.entity.Payment;
-import com.example.backend.entity.Shipment;
+import com.example.backend.entity.*;
 import com.example.backend.enums.OrderStatus;
 import com.example.backend.enums.ShipmentStatus;
+import com.example.backend.enums.TransactionSource;
+import com.example.backend.enums.TransactionType;
 import com.example.backend.mapper.OrderMapper;
+import com.example.backend.repository.InventoryRepository;
+import com.example.backend.repository.InventoryTransactionRepository;
 import com.example.backend.repository.OrderRepository;
 import com.example.backend.repository.ShipmentRepository;
 import jakarta.transaction.Transactional;
@@ -21,13 +22,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor // tự tạo constructor cho final fields
+@RequiredArgsConstructor
 @Slf4j
 public class OrderService {
-
+    private final InventoryTransactionRepository inventoryTransactionRepository;
+    private final InventoryRepository inventoryRepository;
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final ShipmentRepository shipmentRepository;
+    private final CartService cartService;
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request) {
@@ -36,14 +39,37 @@ public class OrderService {
         order.setPlacedAt(LocalDateTime.now());
 
         // map items
-        if (request.getItems() != null) {
-            order.setOrderItems(
-                    request.getItems().stream()
-                            .map(orderMapper::toOrderItem)
-                            .peek(item -> item.setOrder(order)) // gắn order cha
-                            .collect(Collectors.toList())
-            );
-        }
+        List<OrderItem> items = request.getItems().stream()
+                .map(orderMapper::toOrderItem)
+                .peek(item -> {
+                    item.setOrder(order);
+
+                    Inventory inventory = inventoryRepository
+                            .findByVariant_VariantId(item.getVariant().getVariantId())
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy kho"));
+
+                    if (inventory.getQuantity() < item.getQuantity()) {
+                        throw new RuntimeException("Số lượng trong kho không đủ: " + item.getVariant().getVariantId());
+                    }
+
+                    // Giảm tồn kho
+                    inventory.setQuantity(inventory.getQuantity() - item.getQuantity());
+                    inventory.setUpdatedAt(LocalDateTime.now());
+                    inventory.setUpdatedBy(request.getUserId());
+                    inventoryRepository.save(inventory);
+
+                    // Ghi lịch sử
+                    InventoryTransaction transaction = new InventoryTransaction();
+                    transaction.setVariant(item.getVariant());
+                    transaction.setTransactionType(TransactionType.EXPORT);
+                    transaction.setQuantity(item.getQuantity());
+                    transaction.setTransactionSource(TransactionSource.SALE);
+                    transaction.setReferenceId(order.getOrderId());
+                    transaction.setCreatedBy(request.getUserId());
+                    transaction.setTransactionDate(LocalDateTime.now());
+                    inventoryTransactionRepository.save(transaction);
+
+                }).collect(Collectors.toList());
 
         // map shipments
         if (request.getShipments() != null) {
@@ -66,8 +92,12 @@ public class OrderService {
         }
 
         Order savedOrder = orderRepository.save(order);
+        log.info("Tạo đơn thành công: {}", savedOrder.getCode());
 
-        log.info("✅ Tạo đơn thành công: {}", savedOrder.getCode());
+        //Xoá giỏ hàng của user sau khi đặt hàng thành công
+        Long userId = request.getUserId();
+        cartService.clearCart(userId);
+
         return orderMapper.toOrderResponse(savedOrder);
     }
 
@@ -137,6 +167,7 @@ public class OrderService {
         if(payload.containsKey("trackingNumber")) {
             shipment.setTrackingNumber(payload.get("trackingNumber"));
         }
+        shipment.setDeliveredAt(LocalDateTime.now());
 
         return shipmentRepository.save(shipment);
     }

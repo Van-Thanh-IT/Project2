@@ -3,6 +3,9 @@ package com.example.backend.exception;
 import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     // --------- User (1xxx) ---------
+    ROLE_NOT_FOUND(500, "Không tìm thấy vai trong người dùng", HttpStatus.NOT_FOUND),
+
+    // --------- User (1xxx) ---------
     USER_EXISTED(1001, "Tên người dùng đã tồn tại", HttpStatus.CONFLICT),
     USER_NOT_FOUND(1002, "Không tìm thấy người dùng", HttpStatus.NOT_FOUND),
     USER_INVALID_INPUT(1003, "Dữ liệu người dùng không hợp lệ", HttpStatus.BAD_REQUEST),
@@ -19,7 +22,7 @@ public enum ErrorCode {
     AUTH_FORBIDDEN(2003, "Không có quyền truy cập", HttpStatus.FORBIDDEN),
     AUTH_ACCOUNT_LOCKED(2004, "Tài khoản bị khoá do đăng nhập thất bại", HttpStatus.FORBIDDEN),
     AUTH_UNAUTHENTICATED(2005, "Tài khoản chưa được xác thực", HttpStatus.UNAUTHORIZED),
-
+    INVALID_TOKEN(2007, "Token không hợp lệ", HttpStatus.UNAUTHORIZED),
 
     // --------- Product / Catalog (3xxx) ---------
     PRODUCT_NOT_FOUND(3001, "Không tìm thấy sản phẩm", HttpStatus.NOT_FOUND),

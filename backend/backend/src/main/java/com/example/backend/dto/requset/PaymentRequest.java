@@ -2,9 +2,7 @@ package com.example.backend.dto.requset;
 
 import com.example.backend.enums.PaymentStatus;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
@@ -14,6 +12,6 @@ public class PaymentRequest {
     Integer orderId;
     String method;
     Double amount;
-    PaymentStatus status;
+    String status;
     LocalDateTime paidAt;
 }

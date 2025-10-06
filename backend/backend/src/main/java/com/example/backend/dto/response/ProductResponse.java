@@ -29,6 +29,6 @@ public class ProductResponse {
     List<ProductImageResponse> images;
 //
 //    // Danh sách biến thể
-//    List<ProductVariantResponse> variants;
+    List<ProductVariantResponse> variants;
 
 }

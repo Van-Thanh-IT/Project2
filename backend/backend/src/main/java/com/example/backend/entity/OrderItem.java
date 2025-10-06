@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "order_items")
 @Data
@@ -25,6 +27,6 @@ public class OrderItem {
     Integer quantity;
 
     @Column(nullable = false)
-    Double price;
+    BigDecimal price;
 }
 

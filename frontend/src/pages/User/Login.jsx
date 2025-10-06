@@ -1,19 +1,51 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login } from "../../services/Authentication";
+import { login, loginWithGoogle, loginWithFacebook } from "../../services/Authentication";
 import { getInfo } from "../../services/UserService";
 import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
+import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
+import ForgotPasswordModal from "../../components/modal/ForgotPasswordModal";
+import { Button } from "react-bootstrap";
 
 const Login = () => {
   const navigate = useNavigate();
 
-  // State
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
-  // Xử lý submit
+  const handleLoginSuccess = async (token) => {
+    try {
+      localStorage.setItem("token", token);
+      window.dispatchEvent(new Event("login"));
+
+      const userRes = await getInfo();
+
+      const user = userRes?.data;
+      if (!user) {
+        toast.error("Không lấy được thông tin người dùng!");
+        return;
+      }
+
+      const roles = user.roles.map((r) => r.roleName);
+      if (roles.includes("USER") && user.active === false) {
+        toast.error("TÀI KHOẢN CỦA BẠN ĐÃ BỊ KHÓA!");
+        localStorage.removeItem("token");
+        window.dispatchEvent(new Event("login"));
+        return;
+      }
+
+      if (roles.includes("ADMIN")) navigate("/admin");
+      else navigate("/profile");
+    } catch (err) {
+      console.error(err);
+      toast.error("Đã xảy ra lỗi khi lấy thông tin người dùng!");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -22,54 +54,61 @@ const Login = () => {
     try {
       const res = await login(email, password);
       const token = res?.data?.token;
-
       if (!token) {
-        setError(res?.data?.messages || "Đăng nhập thất bại!");
+        setError(res?.messages || "Đăng nhập thất bại!");
         return;
       }
-
-      // Lưu token
-      localStorage.setItem("token", token);
-      window.dispatchEvent(new Event("login"));
-
-      // Lấy thông tin user
-      const userRes = await getInfo();
-      const user = userRes?.data;
-
-      if (!user) {
-        setError("Không lấy được thông tin người dùng!");
-        return;
-      }
-
-      const roles = user.roles.map((r) => r.roleName);
-      // Kiểm tra tài khoản bị khóa
-      if (roles.includes("USER") && user.active === false) {
-        toast.error("TÀI KHOẢN CỦA BẠN ĐÃ BỊ KHÓA!");
-        localStorage.removeItem("token"); 
-        window.dispatchEvent(new Event("login"));
-        return;
-      }
-
-      // Điều hướng theo role
-      if (roles.includes("ADMIN")) {
-        navigate("/admin");
-      } else {
-        navigate("/profile");
-      }
+      await handleLoginSuccess(token);
+      toast.success("Đăng nhập thành công!");
     } catch (err) {
-      if (err.response?.data) {
-        setError(err.response.data.messages);
-      } else {
-        setError("Có lỗi xảy ra, vui lòng thử lại!");
-      }
+      setError(err.response?.data?.messages || "Có lỗi xảy ra!");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const idToken = credentialResponse.credential;
+      const res = await loginWithGoogle(idToken);
+      const token = res?.data?.token;
+
+      if (!token) {
+        toast.error("Đăng nhập Google thất bại!");
+        return;
+      }
+      await handleLoginSuccess(token);
+    } catch (err) {
+      console.error(err);
+      toast.error("Đăng nhập Google thất bại!");
+    }
+  };
+
+  const handleGoogleError = () => toast.error("Không thể đăng nhập bằng Google!");
+
+  const handleFacebookResponse = async (response) => {
+    if (!response.accessToken) {
+      toast.error("Đăng nhập Facebook thất bại hoặc bị hủy!");
+      return;
+    }
+    try {
+      const res = await loginWithFacebook(response.accessToken);
+      const token = res?.data?.token;
+
+      if (!token) {
+        toast.error("Đăng nhập Facebook thất bại!");
+        return;
+      }
+      await handleLoginSuccess(token);
+    } catch (err) {
+      console.error(err);
+      toast.error("Đăng nhập Facebook thất bại!");
+    }
+  };
+
   return (
-    <div className="d-flex justify-content-center bg-light" style={{ minHeight: "80vh", alignItems: "center" }}>
-      <div className="card shadow p-4" style={{ width: 400 }}>
+    <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+      <div className="card shadow-lg p-5" style={{ maxWidth: 450, width: "100%" }}>
         <h3 className="text-center mb-4">Đăng nhập</h3>
 
         {error && <div className="alert alert-danger">{error}</div>}
@@ -99,19 +138,53 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+          <div className="d-flex justify-content-between mb-3">
+           <Button variant="link" onClick={() => setShowForgotModal(true)}>
+            Quên mật khẩu?
+          </Button>
+          </div>
+
+          <button type="submit" className="btn btn-primary w-100 mb-3" disabled={loading}>
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
-        <p className="text-center mt-3 mb-0">
+        <div className="text-center my-3 text-muted">--- Hoặc đăng nhập với ---</div>
+
+        <div className="d-flex flex-column gap-2">
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
+
+          <FacebookLogin
+            appId="2016734672462629"
+            autoLoad={false}
+            fields="name,email,picture"
+            callback={handleFacebookResponse}
+            render={(renderProps) => (
+              <button
+                className="btn btn-primary w-100"
+                onClick={renderProps.onClick}
+              >
+                Đăng nhập với Facebook
+              </button>
+            )}
+          />
+        </div>
+
+        <p className="text-center mt-4 mb-0">
           Chưa có tài khoản?{" "}
-          <Link to="/register" className="text-decoration-none">
+          <Link to="/register" className="text-decoration-none fw-bold">
             Đăng ký ngay
           </Link>
         </p>
       </div>
+        
+        {/* modal quên mk */}
+       <ForgotPasswordModal
+        show={showForgotModal}
+        handleClose={() => setShowForgotModal(false)}
+      />
     </div>
+    
   );
 };
 

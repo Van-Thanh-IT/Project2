@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cart_items")
@@ -22,6 +26,13 @@ public class CartItem {
     @JoinColumn(name = "variant_id", nullable = false)
     ProductVariant variant;
 
-    Integer quantity;
-    Double price;
+    Long quantity;
+    BigDecimal price;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Column(updatable = false)
+    @CreationTimestamp // tự động gắn thời gian
+    LocalDateTime addedAt;
 }

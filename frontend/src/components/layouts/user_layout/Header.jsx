@@ -1,81 +1,191 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Navbar, Nav, NavDropdown, Container, Form, FormControl, Button, Badge } from "react-bootstrap";
-import { FaShoppingCart } from "react-icons/fa";
+import { Navbar, Nav, Container, Form, FormControl, Button, Badge, InputGroup } from "react-bootstrap";
+import { FaShoppingCart, FaSearch } from "react-icons/fa";
+import { getCart } from "../../../services/CartService";
+import { getAllHomeProducts } from "../../../services/HomeService";
+import CategoryNavDropdown from "./CategoryNavDropdown";
+import { getInfo } from "../../../services/UserService";
 
 function Header() {
+  const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [cartCount, setCartCount] = useState(0);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [products, setProducts] = useState([]);
+
   const navigate = useNavigate();
 
+  // Lấy thông tin người dùng
   useEffect(() => {
-    const updateAuth = () => setIsLoggedIn(!!localStorage.getItem("token"));
+    const fetchUser = async () => {
+      try {
+        const res = await getInfo();
+        setUser(res.data);
+      } catch (err) {
+        console.error("Lỗi khi lấy thông tin user:", err);
+      }
+    };
+    if (isLoggedIn) fetchUser();
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      if (!user) return;
+      try {
+        const res = await getCart(user.userId);
+        setCartCount(res.items.length);
+      } catch (err) {
+        console.error("Lỗi khi lấy giỏ hàng:", err);
+      }
+    };
+    fetchCart();
+  }, [user]);
+
+  // Cập nhật auth + load sản phẩm tìm kiếm
+  useEffect(() => {
+    const updateAuth = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+    };
+
     window.addEventListener("storage", updateAuth);
     window.addEventListener("login", updateAuth);
+    window.addEventListener("cartUpdated", () => {
+      if (user) getCart(user.userId).then(res => setCartCount(res.items.length));
+    });
+
+    const fetchProducts = async () => {
+      try {
+        const res = await getAllHomeProducts();
+        if (res?.data) setProducts(res.data);
+      } catch (err) {
+        console.error("Lỗi khi lấy danh sách sản phẩm:", err);
+      }
+    };
+    fetchProducts();
+
     return () => {
       window.removeEventListener("storage", updateAuth);
       window.removeEventListener("login", updateAuth);
+      window.removeEventListener("cartUpdated", () => {});
     };
-  }, []);
+  }, [user]);
 
+  // Đăng xuất
   const handleLogout = () => {
+    if (!window.confirm("Bạn có muốn đăng xuất không!")) return;
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    setUser(null);
+    setCartCount(0);
     navigate("/login");
+  };
+
+  // Tìm kiếm
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+
+    if (!value) {
+      setSuggestions([]);
+      return;
+    }
+
+    const filtered = products.filter(p =>
+      p.productName.toLowerCase().includes(value.toLowerCase()) ||
+      p.brand.toLowerCase().includes(value.toLowerCase()) ||
+      (p.material && p.material.toLowerCase().includes(value.toLowerCase()))
+    );
+
+    setSuggestions(filtered.slice(0, 5));
+  };
+
+  const handleSelectSuggestion = (keyword) => {
+    setSearchKeyword(keyword);
+    setSuggestions([]);
+    navigate(`/search?q=${encodeURIComponent(keyword)}`);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!searchKeyword) return;
+    setSuggestions([]);
+    navigate(`/search?q=${encodeURIComponent(searchKeyword)}`);
   };
 
   return (
     <Navbar expand="lg" className="shadow-sm sticky-top" style={{ backgroundColor: "#111" }}>
-      <Container fluid className="d-flex align-items-center">
-        {/* Logo to góc trái */}
+      <Container fluid>
         <Navbar.Brand as={Link} to="/" className="fw-bold fs-2 text-white me-4">
           Nội Thất
         </Navbar.Brand>
 
-        {/* Menu nav ở giữa */}
-        <Nav className="me-auto align-items-center">
+        <Nav className="me-auto">
           <Nav.Link as={Link} to="/" className="fw-bold text-white">Trang chủ</Nav.Link>
-          <NavDropdown title={<span className="fw-bold text-white">Sản phẩm</span>} id="basic-nav-dropdown">
-            <NavDropdown.Item as={Link} to="/product">Tất cả sản phẩm</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/product/kfrgvs">Phòng Khách</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/product/bedroom">Phòng Ngủ</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/product/phong-bep">Phòng Bếp</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/product/nha-tam">Nhà Tắm</NavDropdown.Item>
-          </NavDropdown>
+          <CategoryNavDropdown />
           <Nav.Link as={Link} to="/desgin" className="fw-bold text-white">Thiết kế</Nav.Link>
           <Nav.Link as={Link} to="/contact" className="fw-bold text-white">Liên hệ</Nav.Link>
-          {isLoggedIn && <Nav.Link as={Link} to="/profile" className="fw-bold text-white">Trang cá nhân</Nav.Link>}
+          {isLoggedIn && (
+            <Nav.Link as={Link} to="/user/profile" className="fw-bold text-white">Trang cá nhân</Nav.Link>
+          )}
         </Nav>
 
-        {/* Search dài và cụm giỏ hàng + login/register/logout ở góc phải */}
-        <div className="d-flex align-items-center ms-3">
-          <Form className="d-flex me-5 ">
+        {/* Search */}
+        <Form className="position-relative mx-auto" style={{ width: "500px" }} onSubmit={handleSearch}>
+          <InputGroup>
             <FormControl
               type="search"
               placeholder="Tìm kiếm sản phẩm..."
-              className="me-2 bg-white text-black"
-              style={{width:"400px"}}
+              value={searchKeyword}
+              onChange={handleSearchChange}
+              className="bg-white text-black"
             />
-            <Button variant="primary">Tìm</Button>
-          </Form>
+            <Button variant="danger" type="submit">
+              <FaSearch />
+            </Button>
+          </InputGroup>
 
-          <Nav className="align-items-center">
-            <Nav.Link as={Link} to="/cart" className="position-relative text-white me-3">
-              <FaShoppingCart size={25} />
-              <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">
-                0
-              </Badge>
-            </Nav.Link>
+          {suggestions.length > 0 && (
+            <div className="position-absolute bg-white border w-100 shadow"
+                 style={{ top: "100%", left: 0, zIndex: 1000, borderRadius: "0 0 5px 5px" }}>
+              {suggestions.map(p => (
+                <div
+                  key={p.productId}
+                  className="p-2 d-flex justify-content-between align-items-center"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => handleSelectSuggestion(p.productName)}
+                  onMouseEnter={(e) => e.currentTarget.classList.add("bg-light")}
+                  onMouseLeave={(e) => e.currentTarget.classList.remove("bg-light")}
+                >
+                  <span>{p.productName}</span>
+                  {p.brand && <small className="text-muted">{p.brand}</small>}
+                </div>
+              ))}
+            </div>
+          )}
+        </Form>
 
-            {!isLoggedIn ? (
-              <>
-                <Button as={Link} to="/register" variant="success" className="me-2 fw-bold">Register</Button>
-                <Button as={Link} to="/login" variant="primary" className="fw-bold">Login</Button>
-              </>
-            ) : (
-              <Button variant="danger" onClick={handleLogout} className="fw-bold">Logout</Button>
-            )}
-          </Nav>
-        </div>
+        {/* Cart & Auth */}
+        <Nav className="align-items-center ms-3">
+          {isLoggedIn && (
+             <Nav.Link as={Link} to="/cart" className="position-relative text-white me-3">
+            <FaShoppingCart size={25} />
+            <Badge bg="danger" pill className="position-absolute top-0 start-100 translate-middle">
+              {cartCount}
+            </Badge>
+          </Nav.Link>
+          )}
+
+          {!isLoggedIn ? (
+            <>
+              <Button as={Link} to="/register" variant="success" className="me-2 fw-bold">Register</Button>
+              <Button as={Link} to="/login" variant="primary" className="fw-bold">Login</Button>
+            </>
+          ) : (
+            <Button variant="danger" onClick={handleLogout} className="fw-bold">Logout</Button>
+          )}
+        </Nav>
       </Container>
     </Navbar>
   );

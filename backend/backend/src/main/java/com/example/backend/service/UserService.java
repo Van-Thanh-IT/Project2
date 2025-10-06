@@ -42,6 +42,11 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        // Check phone đã tồn tại hay chưa
+        if(userRepository.existsByPhone( phone)){
+            throw new CustomException(ErrorCode.USER_PHONE_EXISTED);
+        }
+
         user.setFullName(fullName);
         user.setPhone(phone);
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Button, Container} from "react-bootstrap";
+import { Table, Button, Container, Form } from "react-bootstrap";
 import {
   getAllCategories,
   createCategory,
@@ -12,6 +12,7 @@ import "../../styles/global.scss";
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
+  const [filteredCategories, setFilteredCategories] = useState([]);
   const [form, setForm] = useState({
     categoryName: "",
     parentId: "",
@@ -19,6 +20,7 @@ const CategoryManagement = () => {
   });
   const [editingCategory, setEditingCategory] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     loadCategories();
@@ -27,7 +29,9 @@ const CategoryManagement = () => {
   const loadCategories = async () => {
     try {
       const data = await getAllCategories();
+      
       setCategories(data);
+      setFilteredCategories(data);
     } catch (error) {
       toast.error("Không thể tải danh mục!");
       console.error("Lỗi load categories:", error);
@@ -86,20 +90,69 @@ const CategoryManagement = () => {
     try {
       const res = await toggleCategoryStatus(category.categoryId, { isActive: !category.isActive });
       toast.success(res.messages);
-     
       await loadCategories();
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.messages);
     }
   };
+
+    const normalize = (str) =>
+    str
+      .toString()             // đảm bảo là string
+      .trim()                 // bỏ khoảng trắng đầu/cuối
+      .replace(/\s+/g, " ")   // chuẩn hóa khoảng trắng giữa các từ
+      .toLowerCase();         // chuyển về chữ thường
+
+    const handleSearch = (e) => {
+      const term = normalize(e.target.value);
+      setSearchTerm(e.target.value);
+
+      const filtered = categories.filter((c) => {
+        const parentName = c.parentId
+          ? categories.find(p => p.categoryId === c.parentId)?.categoryName
+          : "Danh mục cha";
+        const status = c.isActive ? "hoạt động" : "ẩn";
+
+        return (
+          normalize(c.categoryName).includes(term) ||
+          normalize(parentName).includes(term) ||
+          normalize(status).includes(term)
+        );
+      });
+
+      setFilteredCategories(filtered);
+    };
+
+
+
   return (
-   <Container className="mt-4">
+    <Container className="mt-4">
       <h2 className="mb-3">Quản lý Danh mục</h2>
-      <Button variant="success" className="mb-3" onClick={() => { setEditingCategory(null); setForm({ categoryName: "", parentId: "", imageFile: null }); setShowModal(true); }}>Thêm danh mục</Button>
+
+      <div className="d-flex justify-content-between mb-3">
+        <Form.Control
+          type="text"
+          placeholder="Tìm kiếm danh mục..."
+          value={searchTerm}
+          onChange={handleSearch}
+          className="w-50"
+        />
+        <Button
+          variant="success"
+          onClick={() => {
+            setEditingCategory(null);
+            setForm({ categoryName: "", parentId: "", imageFile: null });
+            setShowModal(true);
+          }}
+        >
+          Thêm danh mục
+        </Button>
+      </div>
+
       <div style={{ maxHeight: "500px", overflowY: "auto" }}>
         <Table striped bordered hover className="table-dark">
-          <thead >
+          <thead>
             <tr>
               <th>ID</th>
               <th>Tên danh mục</th>
@@ -110,16 +163,38 @@ const CategoryManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {categories.map(c => (
+            {filteredCategories.map((c) => (
               <tr key={c.categoryId}>
                 <td>{c.categoryId}</td>
                 <td>{c.categoryName}</td>
-                <td>{c.parentId ? categories.find(p => p.categoryId === c.parentId)?.categoryName : "Danh mục cha"}</td>
-                <td>{c.imageUrl && <img src={`http://localhost:8080${c.imageUrl}`} alt={c.categoryName} style={{ width: "50px", height: "50px", objectFit: "cover" }} />}</td>
-                <td>{c.isActive ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-secondary">Ẩn</span>}</td>
                 <td>
-                  <Button size="sm" variant="primary" className="me-2" onClick={() => handleEdit(c)}>Sửa</Button>
-                  <Button size="sm" variant={c.isActive ? "warning" : "success"} onClick={() => handleToggleStatus(c)}>{c.isActive ? "Ẩn" : "Hiện"}</Button>
+                  {c.parentId
+                    ? categories.find((p) => p.categoryId === c.parentId)?.categoryName
+                    : "Danh mục cha"}
+                </td>
+                <td>
+                  {c.imageUrl && (
+                    <img
+                      src={`http://localhost:8080${c.imageUrl}`}
+                      alt={c.categoryName}
+                      style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                    />
+                  )}
+                </td>
+                <td>
+                  {c.isActive ? (
+                    <span className="badge bg-success">Hoạt động</span>
+                  ) : (
+                    <span className="badge bg-secondary">Ẩn</span>
+                  )}
+                </td>
+                <td>
+                  <Button size="sm" variant="primary" className="me-2" onClick={() => handleEdit(c)}>
+                    Sửa
+                  </Button>
+                  <Button size="sm" variant={c.isActive ? "warning" : "success"} onClick={() => handleToggleStatus(c)}>
+                    {c.isActive ? "Ẩn" : "Hiện"}
+                  </Button>
                 </td>
               </tr>
             ))}
@@ -127,7 +202,15 @@ const CategoryManagement = () => {
         </Table>
       </div>
 
-      <CategoryModal show={showModal} onHide={() => setShowModal(false)} onSubmit={handleSubmit} form={form} handleChange={handleChange} editingCategory={editingCategory} categories={categories} />
+      <CategoryModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onSubmit={handleSubmit}
+        form={form}
+        handleChange={handleChange}
+        editingCategory={editingCategory}
+        categories={categories}
+      />
     </Container>
   );
 };
