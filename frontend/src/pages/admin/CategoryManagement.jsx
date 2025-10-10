@@ -185,15 +185,15 @@ const CategoryManagement = () => {
                   {c.isActive ? (
                     <span className="badge bg-success">Hoạt động</span>
                   ) : (
-                    <span className="badge bg-secondary">Ẩn</span>
+                    <span className="badge bg-danger">đã xóa</span>
                   )}
                 </td>
                 <td>
                   <Button size="sm" variant="primary" className="me-2" onClick={() => handleEdit(c)}>
                     Sửa
                   </Button>
-                  <Button size="sm" variant={c.isActive ? "warning" : "success"} onClick={() => handleToggleStatus(c)}>
-                    {c.isActive ? "Ẩn" : "Hiện"}
+                  <Button size="sm" variant={c.isActive ? "danger" : "success"} onClick={() => handleToggleStatus(c)}>
+                    {c.isActive ? "Xóa" : "Khôi phục"}
                   </Button>
                 </td>
               </tr>

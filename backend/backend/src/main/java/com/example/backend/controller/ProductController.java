@@ -113,6 +113,16 @@ public class ProductController {
     }
 
     ///////////// ProductVariant
+
+    // get all product variant
+    @GetMapping("/variants/read")
+    public APIResponse<List<ProductVariantResponse>> getAllProductVariants(){
+        List<ProductVariantResponse> variant = productService.getAllVariants();
+        return APIResponse.<List<ProductVariantResponse>>builder()
+                .code(200)
+                .data(variant)
+                .build();
+    }
     // get prodct variant by productId
     @GetMapping("/{productId}/variants/read")
     public APIResponse<List<ProductVariantResponse>> getProductVariantById(@PathVariable Long productId){

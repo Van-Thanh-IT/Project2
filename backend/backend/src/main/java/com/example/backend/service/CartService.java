@@ -89,14 +89,20 @@ public class CartService {
         return cartMapper.toCartResponse(cart);
     }
 
-    // Xóa toàn bộ giỏ hàng của user sau khi đặt hàng
+
     @Transactional
-    public void clearCart(Long userId) {
+    public CartResponse removeItemByVariant(Long userId, List<Long> variantIds) {
         Cart cart = getOrCreateCart(userId);
-        // Xóa từng CartItem
-        cart.getCartItems().clear();
-        cartRepository.save(cart); // Cập nhật cart rỗng
+
+        // Xoá tất cả item có variantId thuộc danh sách variantIds
+        cart.getCartItems().removeIf(ci -> variantIds.contains(ci.getVariant().getVariantId()));
+
+        // Lưu cart sau khi xoá
+        cartRepository.save(cart);
+
+        return cartMapper.toCartResponse(cart);
     }
+
 
 
 }

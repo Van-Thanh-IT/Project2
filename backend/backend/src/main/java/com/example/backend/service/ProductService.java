@@ -29,7 +29,6 @@ public class ProductService {
     ProductImageRepository productImageRepository;
     ProductVariantRepository productVariantRepository;
     CategoryRepository categoryRepository;
-    ReviewRepository reviewRepository;
 
     InventoryRepository inventoryRepository;
 
@@ -45,11 +44,6 @@ public class ProductService {
     //tìm kiếm sp theo danh mục
     public List<HomeProductProjection> getProductsByCategorySlug(String slug) {
         return productRepository.findProductsByCategorySlug(slug);
-    }
-
-    // lấy dl đánh giá trung bình và lượt đánh giá
-    public List<ProductReviewSummary> getProductReviewSummary() {
-        return reviewRepository.findProductReviewSummary();
     }
 
     // get home product
@@ -201,10 +195,17 @@ public class ProductService {
 
     ///////////////////////////////// ProductVariant
 
+    // lấy tất cả dl
+    public List<ProductVariantResponse> getAllVariants(){
+        List<ProductVariant> productImages = productVariantRepository.findAll();
+        return productImages.stream()
+                .map(productMapper::toProductVariantResponse).toList();
+    }
+
     // lấy dữ liệu theo productId;
     public List<ProductVariantResponse> getVariantByProductId(Long productId){
-        List<ProductVariant> productImages = productVariantRepository.findByProduct_ProductId(productId);
-        return productImages.stream()
+        List<ProductVariant> productVariants = productVariantRepository.findByProduct_ProductId(productId);
+        return productVariants.stream()
                 .map(productMapper::toProductVariantResponse).toList();
     }
 

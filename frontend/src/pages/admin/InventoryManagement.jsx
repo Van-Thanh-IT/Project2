@@ -5,7 +5,8 @@ import {
   getAllTransactions,
   createTransaction,
 } from "../../services/InventoryService";
-import { Table, Button, Spinner, Form } from "react-bootstrap";
+import { getAllProductVariants } from "../../services/productService";
+import { Table, Button, Spinner, Form, Toast } from "react-bootstrap";
 import UpdateInventoryModal from "../../components/modal/UpdateInventoryModal";
 import TransactionModal from "../../components/modal/TransactionModal";
 import { toast } from "react-toastify";
@@ -16,6 +17,7 @@ const CURRENT_USER_ID = 28;
 
 const InventoryManagement = () => {
   const [inventories, setInventories] = useState([]);
+  const [productVariants, setProductVariants] = useState([]);      // ✅ Thêm state
   const [filteredInventories, setFilteredInventories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [selectedInventory, setSelectedInventory] = useState(null);
@@ -42,17 +44,20 @@ const InventoryManagement = () => {
     ADJUSTMENT: "Điều chỉnh",
   };
 
-  // Fetch dữ liệu tồn kho & giao dịch
+  // ✅ Fetch dữ liệu tồn kho & giao dịch & variants
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [invRes, transRes] = await Promise.all([
+      const [invRes, transRes, variantRes] = await Promise.all([
         getAllInventory(),
         getAllTransactions(),
+        getAllProductVariants(),   
       ]);
+
       setInventories(invRes?.data || []);
       setFilteredInventories(invRes?.data || []);
       setTransactions(transRes || []);
+      setProductVariants(variantRes?.data || []); // ✅ lưu vào state
     } catch (err) {
       toast.error(err.response?.messages || "Lỗi khi tải dữ liệu");
       console.error("Lỗi khi fetch data:", err);
@@ -118,9 +123,10 @@ const InventoryManagement = () => {
       return alert("Số lượng phải lớn hơn 0");
     setLoading(true);
     try {
-      await createTransaction(transactionPayload);
+     const res =  await createTransaction(transactionPayload);
       setShowTransactionModal(false);
       await fetchData();
+      toast.success(res?.messages);
     } catch (err) {
       console.error(err);
       toast.error(err.response?.messages || "Lỗi khi tạo giao dịch");
@@ -144,24 +150,21 @@ const InventoryManagement = () => {
           value={searchTerm}
           onChange={handleSearch}
         />
-        <div className="d-flex gap-2 " >
-           <Button
-          variant="info"
-          
-          onClick={() => ExportCSV(filteredInventories, "tonkho.csv")}
-        >
-          Xuất File tồn kho
-        </Button>
-        <Button
-          variant="warning"
-          onClick={() => ExportCSV(transactions, "giaodich.csv")}
-        >
-          Xuất File giao dịch
-        </Button>
+        <div className="d-flex gap-2">
+          <Button
+            variant="info"
+            onClick={() => ExportCSV(filteredInventories, "tonkho.csv")}
+          >
+            Xuất File tồn kho
+          </Button>
+          <Button
+            variant="warning"
+            onClick={() => ExportCSV(transactions, "giaodich.csv")}
+          >
+            Xuất File giao dịch
+          </Button>
         </div>
-       
       </div>
-
 
       {/* Bảng tồn kho */}
       <div style={{ maxHeight: "400px", overflowY: "auto" }}>
@@ -257,6 +260,7 @@ const InventoryManagement = () => {
         payload={transactionPayload}
         onChange={setTransactionPayload}
         onSubmit={handleTransactionSubmit}
+        variants={productVariants}  
       />
     </div>
   );

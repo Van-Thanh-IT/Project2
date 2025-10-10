@@ -43,7 +43,7 @@ function Home() {
 
       <section className="py-5 bg-light">
         <Container fluid>
-          <h2 className="mb-4 text-center">Sản phẩm nổi bật</h2>
+          <h2 className="mb-4 text-center">Sản phẩm</h2>
           <Row xs={2} sm={3} md={4} lg={5} className="g-4">
             {products.map((product) => (
               <Col key={product.productId}>

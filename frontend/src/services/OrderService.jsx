@@ -4,7 +4,7 @@ import axiosClient from "./axiosClient";
 // Lấy tất cả đơn hàng của 1 user
 export const getOrderByUser = async (userId) => {
   const res = await axiosClient.get(`users/orders/user/${userId}`);
-  return res.data; // res.data chứa code, messages, data
+  return res.data; 
 };
 
 // Lấy tất cả đơn hàng

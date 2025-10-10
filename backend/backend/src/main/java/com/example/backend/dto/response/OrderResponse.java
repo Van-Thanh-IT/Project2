@@ -17,7 +17,7 @@ public class OrderResponse {
     Double subtotal;
     Double shippingFee;
     Double total;
-    LocalDateTime placedAt;
+    String placedAt;
     String fullName;
     String phone;
 

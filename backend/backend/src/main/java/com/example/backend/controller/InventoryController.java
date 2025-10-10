@@ -5,6 +5,7 @@ import com.example.backend.dto.requset.InventoryTransactionRequest;
 import com.example.backend.dto.response.APIResponse;
 import com.example.backend.dto.response.InventoryResponse;
 import com.example.backend.dto.response.InventoryTransactionResponse;
+import com.example.backend.enums.TransactionType;
 import com.example.backend.service.InventoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -54,10 +55,16 @@ public class InventoryController {
 
     //Tạo giao dịch nhập / xuất kho
     @PostMapping("/transactions/create")
-    public ResponseEntity<InventoryTransactionResponse> createTransaction(
+    public APIResponse<InventoryTransactionResponse> createTransaction(
             @RequestBody InventoryTransactionRequest request) {
+        String transactionType = request.getTransactionType() == TransactionType.IMPORT
+                ? "Nhập kho thành công!"
+                : "Xuất kho thành công!";
 
         InventoryTransactionResponse response = inventoryService.createTransaction(request);
-        return ResponseEntity.ok(response);
+        return APIResponse.<InventoryTransactionResponse>builder()
+                .messages(transactionType)
+                .data(response)
+                .build();
     }
 }

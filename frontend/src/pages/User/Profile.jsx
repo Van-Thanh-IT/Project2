@@ -48,6 +48,7 @@ const Profile = () => {
     if (!user?.userId) return;
     try {
       const data = await getOrderByUser(user.userId);
+      console.log(data);
       setOrders(data || []);
       setShowOrdersModal(true);
     } catch (err) {

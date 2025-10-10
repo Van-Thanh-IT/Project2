@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Modal, Button, Form } from "react-bootstrap";
-
+import { createVnpayPayment } from "../../services/axiosPublic";
 import { getLocations, createOrder } from "../../services/HomeService";
 import { toast } from "react-toastify";
 
 function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
   const [fullName, setFullName] = useState("");
+  const navigate = useNavigate();
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [province, setProvince] = useState("");
@@ -13,6 +15,14 @@ function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
   const [ward, setWard] = useState("");
   const [locations, setLocations] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
+
+  // validation state
+  const [errors, setErrors] = useState({
+    fullName: "",
+    phone: "",
+    address: "",
+    location: "",
+  });
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -33,7 +43,53 @@ function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
   const shippingFee = 30000;
   const total = subtotal + shippingFee;
 
+  // Phone regex for VN mobile: starts with 0 and then 9 digits, common prefixes 3/5/7/8/9
+  const phoneRegex = /^(0)(3|5|7|8|9)\d{8}$/;
+
+  // realtime validation when inputs change
+  useEffect(() => {
+    const newErrors = { ...errors };
+
+    // fullName
+    if (!fullName.trim()) newErrors.fullName = "Họ và tên không được để trống.";
+    else if (fullName.trim().length < 2) newErrors.fullName = "Họ và tên quá ngắn.";
+    else newErrors.fullName = "";
+
+    // phone
+    if (!phone.trim()) newErrors.phone = "Số điện thoại không được để trống.";
+    else if (!phoneRegex.test(phone.trim())) newErrors.phone = "Số điện thoại không hợp lệ. Ví dụ: 0912345678";
+    else newErrors.phone = "";
+
+    // address
+    if (!address.trim()) newErrors.address = "Địa chỉ không được để trống.";
+    else if (address.trim().length < 5) newErrors.address = "Địa chỉ quá ngắn.";
+    else newErrors.address = "";
+
+    // location
+    if (!province || !district || !ward) newErrors.location = "Vui lòng chọn đầy đủ Tỉnh/Quận/Phường.";
+    else newErrors.location = "";
+
+    setErrors(newErrors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullName, phone, address, province, district, ward]);
+
+  const hasErrors = Object.values(errors).some(e => e);
+
   const handleCheckout = async () => {
+    // final validation (extra safety)
+    if (!fullName || !phone || !address || !province || !district || !ward) {
+      toast.warning("Vui lòng điền đầy đủ thông tin giao hàng!");
+      return;
+    }
+    if (!phoneRegex.test(phone.trim())) {
+      toast.warning("Số điện thoại không hợp lệ. Ví dụ: 0912345678");
+      return;
+    }
+    if (fullName.trim().length < 2) {
+      toast.warning("Họ tên không hợp lệ.");
+      return;
+    }
+
     const orderData = {
       userId,
       code: `ORD${Date.now()}`,
@@ -49,28 +105,35 @@ function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
         variantId: i.variantId,
         quantity: i.quantity,
         price: i.price
-      })),
-      shipments: [
-        {
-          carrier: "J&T",
-          trackingNumber: `GHN${Math.floor(Math.random() * 1e9)}`
-        }
-      ],
-      payments: [
-        {
-          method: paymentMethod,
-          amount: total,
-          paidAt: new Date().toISOString()
-        }
-      ]
+      }))
     };
 
     try {
-      await createOrder(orderData);
-      toast.success("Đặt hàng thành công!");
-      onHide();
-      onOrderSuccess();
-      window.dispatchEvent(new Event("cartUpdated"));
+      if (paymentMethod === "CASH") {
+        // Thanh toán khi nhận hàng
+        await createOrder({
+          ...orderData,
+          payments: [{ method: "CASH", amount: total, paidAt: new Date().toISOString() }],
+          shipments: [{
+            carrier: "J&T",
+            trackingNumber: `GHN${Math.floor(Math.random() * 1e9)}`
+          }]
+        });
+
+        toast.success("Đặt hàng thành công!");
+        onHide();
+        onOrderSuccess();
+        window.dispatchEvent(new Event("cartUpdated"));
+        navigate("/profile");
+      } else if (paymentMethod === "VNPAY") {
+        // Thanh toán VNPAY
+        const paymentData = await createVnpayPayment(orderData);
+        if (paymentData && paymentData.url) {
+          window.location.href = paymentData.url;
+        } else {
+          toast.error("Không lấy được URL thanh toán VNPAY!");
+        }
+      }
     } catch (err) {
       console.error(err);
       toast.error("Đặt hàng thất bại");
@@ -87,17 +150,35 @@ function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
         <Form>
           <Form.Group className="mb-2">
             <Form.Label>Họ và tên</Form.Label>
-            <Form.Control value={fullName} onChange={e => setFullName(e.target.value)} />
+            <Form.Control
+              value={fullName}
+              onChange={e => setFullName(e.target.value)}
+              isInvalid={!!errors.fullName}
+              placeholder="Ví dụ: Nguyễn Văn A"
+            />
+            <Form.Control.Feedback type="invalid">{errors.fullName}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-2">
             <Form.Label>Số điện thoại</Form.Label>
-            <Form.Control value={phone} onChange={e => setPhone(e.target.value)} />
+            <Form.Control
+              value={phone}
+              onChange={e => setPhone(e.target.value.replace(/\s+/g, ""))}
+              isInvalid={!!errors.phone}
+              placeholder="Ví dụ: 0912345678"
+            />
+            <Form.Control.Feedback type="invalid">{errors.phone}</Form.Control.Feedback>
           </Form.Group>
 
           <Form.Group className="mb-2">
             <Form.Label>Địa chỉ</Form.Label>
-            <Form.Control value={address} onChange={e => setAddress(e.target.value)} />
+            <Form.Control
+              value={address}
+              onChange={e => setAddress(e.target.value)}
+              isInvalid={!!errors.address}
+              placeholder="Số nhà, tên đường..."
+            />
+            <Form.Control.Feedback type="invalid">{errors.address}</Form.Control.Feedback>
           </Form.Group>
 
           <div className="d-flex gap-2 mb-2">
@@ -122,13 +203,29 @@ function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
               ))}
             </Form.Select>
           </div>
+          {errors.location && <div className="text-danger mb-2">{errors.location}</div>}
 
+          {/* Chọn phương thức thanh toán bằng radio */}
           <Form.Group className="mt-3">
             <Form.Label>Phương thức thanh toán</Form.Label>
-            <Form.Select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)}>
-              <option value="CASH">Thanh toán khi nhận hàng</option>
-              <option value="VNPAY">VNPAY</option>
-            </Form.Select>
+            <div className="d-flex flex-column mt-2">
+              <Form.Check 
+                type="radio" 
+                label="Thanh toán khi nhận hàng" 
+                name="paymentMethod" 
+                value="CASH"
+                checked={paymentMethod === "CASH"}
+                onChange={e => setPaymentMethod(e.target.value)}
+              />
+              <Form.Check 
+                type="radio" 
+                label="Thanh toán VNPAY" 
+                name="paymentMethod" 
+                value="VNPAY"
+                checked={paymentMethod === "VNPAY"}
+                onChange={e => setPaymentMethod(e.target.value)}
+              />
+            </div>
           </Form.Group>
 
           <div className="mt-3">
@@ -141,7 +238,9 @@ function CheckoutModal({ show, onHide, cartItems, userId, onOrderSuccess }) {
 
       <Modal.Footer>
         <Button variant="secondary" onClick={onHide}>Hủy</Button>
-        <Button variant="success" onClick={handleCheckout}>Đặt hàng</Button>
+        <Button variant="success" onClick={handleCheckout} disabled={hasErrors}>
+          Đặt hàng
+        </Button>
       </Modal.Footer>
     </Modal>
   );

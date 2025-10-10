@@ -112,6 +112,7 @@ function Header() {
     if (!searchKeyword) return;
     setSuggestions([]);
     navigate(`/search?q=${encodeURIComponent(searchKeyword)}`);
+    setSearchKeyword(""); 
   };
 
   return (
@@ -127,7 +128,7 @@ function Header() {
           <Nav.Link as={Link} to="/desgin" className="fw-bold text-white">Thiết kế</Nav.Link>
           <Nav.Link as={Link} to="/contact" className="fw-bold text-white">Liên hệ</Nav.Link>
           {isLoggedIn && (
-            <Nav.Link as={Link} to="/user/profile" className="fw-bold text-white">Trang cá nhân</Nav.Link>
+            <Nav.Link as={Link} to="/profile" className="fw-bold text-white">Trang cá nhân</Nav.Link>
           )}
         </Nav>
 

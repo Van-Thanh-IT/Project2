@@ -91,12 +91,16 @@ public class OrderService {
             );
         }
 
+        //Lưu order
         Order savedOrder = orderRepository.save(order);
         log.info("Tạo đơn thành công: {}", savedOrder.getCode());
 
         //Xoá giỏ hàng của user sau khi đặt hàng thành công
         Long userId = request.getUserId();
-        cartService.clearCart(userId);
+        List<Long> variantIds = request.getItems().stream()
+                .map(item -> item.getVariantId().longValue())
+                .toList();
+        cartService.removeItemByVariant(userId, variantIds);
 
         return orderMapper.toOrderResponse(savedOrder);
     }

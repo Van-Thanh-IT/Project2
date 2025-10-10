@@ -14,6 +14,7 @@ import Cart from "../pages/User/Cart.jsx";
 import Profile from "../pages/User/Profile.jsx";
 import ProductDetail from "../pages/User/ProductDetal.jsx";
 import Search from "../pages/User/Search.jsx";
+import PaymentResult from "../pages/User/PaymentResult.jsx";
 
 // admin
 import DashboardPage from "../pages/admin/DashboardPage.jsx";
@@ -21,10 +22,10 @@ import ProductManagement from "../pages/admin/ProductManagement.jsx";
 import CategoryManagement from "../pages/admin/CategoryManagement.jsx";
 import UserManagement from "../pages/admin/UserManagement.jsx";
 import OrderManagement from "../pages/admin/OrderManagement.jsx";
-import PaymentManagement from "../pages/admin/PaymentManagement.jsx";
 import ReviewManageMent from "../pages/admin/ReviewManageMent.jsx";
 import InventoryManagement from "../pages/admin/InventoryManagement.jsx";
 import ReportStatisticsManagement from "../pages/admin/Report_StatisticsManagement.jsx";
+
 
 function AppRouter() {
   return (
@@ -44,8 +45,9 @@ function AppRouter() {
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Regiter />} />
           <Route path="cart" element={<Cart />} />
-          <Route path="user/profile" element={<Profile />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="search" element={<Search />} />
+          <Route path="/payment-result" element={<PaymentResult />} />
         </Route>
 
         {/* admin routes */}
@@ -55,7 +57,6 @@ function AppRouter() {
           <Route path="category" element={<CategoryManagement />} />
           <Route path="user" element={<UserManagement />} />
           <Route path="order" element={<OrderManagement />} />
-          <Route path="payment" element={<PaymentManagement />} />
           <Route path="review" element={<ReviewManageMent />} />
           <Route path="inventory" element={<InventoryManagement />} />
           <Route path="report_statistics" element={<ReportStatisticsManagement />} />

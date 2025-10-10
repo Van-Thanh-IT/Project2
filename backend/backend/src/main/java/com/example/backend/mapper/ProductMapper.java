@@ -25,6 +25,7 @@ public interface ProductMapper {
 
     ProductImageResponse toProductImageResponse(ProductImage productImage);
 
+    @Mapping(source = "product.productName", target = "productName")
     ProductVariantResponse toProductVariantResponse(ProductVariant productVariant);
 
 }

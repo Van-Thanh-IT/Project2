@@ -36,6 +36,12 @@ public class InventoryService {
     InventoryMapper inventoryMapper;
     InventoryTransactionMapper transactionMapper;
 
+    public boolean isInStock(Long variantId, int requiredQuantity) {
+        Inventory inventory = inventoryRepository.findByVariant_VariantId(variantId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tồn kho cho variant ID: " + variantId));
+
+        return inventory.getQuantity() >= requiredQuantity;
+    }
 
      //Lấy toàn bộ danh sách tồn kho
     public List<InventoryResponse> getAllInventory() {

@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.Inter.ProductRatingStats;
 import com.example.backend.dto.requset.ReviewRequest;
 import com.example.backend.dto.response.ReviewResponse;
 import com.example.backend.entity.Product;
@@ -87,10 +88,26 @@ public class ReviewService {
                 .stream().map(reviewMapper::toReviewResponse).collect(Collectors.toList());
     }
 
-    // Get by product
-    public List<ReviewResponse> getByProduct(Long productId) {
-        return reviewRepository.findByProduct_ProductId(productId)
-                .stream().map(reviewMapper::toReviewResponse).collect(Collectors.toList());
+
+    // Lấy thống kê đánh giá theo productId
+    public ProductRatingStats getProductReviewStats(Long productId) {
+        ProductRatingStats stats = reviewRepository.getStats(productId);
+
+        if (stats == null) {
+            // Nếu sản phẩm chưa có review, trả về giá trị mặc định
+            return new ProductRatingStats() {
+                @Override
+                public Double getAverageRating() {
+                    return 0.0;
+                }
+
+                @Override
+                public Long getReviewCount() {
+                    return 0L;
+                }
+            };
+        }
+        return stats;
     }
 
     // Get by user

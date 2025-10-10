@@ -13,7 +13,7 @@ const transactionSourceVN = {
   ADJUSTMENT: "Điều chỉnh",
 };
 
-const TransactionModal = ({ show, onHide, payload, onChange, onSubmit }) => {
+const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants }) => {
   if (!payload) return null;
 
   return (
@@ -23,6 +23,24 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit }) => {
       </Modal.Header>
       <Modal.Body>
         <Form>
+          {/*Chọn biến thể sản phẩm */}
+          <Form.Group className="mb-3">
+            <Form.Label>Biến thể sản phẩm</Form.Label>
+            <Form.Select
+              value={payload.variantId || ""}
+              onChange={(e) =>
+                onChange({ ...payload, variantId: parseInt(e.target.value) })
+              }
+            >
+              <option value="">-- Chọn biến thể --</option>
+              {variants.map((v) => (
+                <option key={v.variantId} value={v.variantId}>
+                  {v.productName} - {v.color}/{v.size}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
           <Form.Group className="mb-3">
             <Form.Label>Loại giao dịch</Form.Label>
             <Form.Select
@@ -88,7 +106,11 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit }) => {
         <Button variant="secondary" onClick={onHide}>
           Hủy
         </Button>
-        <Button variant="success" onClick={onSubmit}>
+        <Button
+          variant="success"
+          onClick={onSubmit}
+          disabled={!payload.variantId} // Bắt buộc chọn variant
+        >
           Thực hiện
         </Button>
       </Modal.Footer>

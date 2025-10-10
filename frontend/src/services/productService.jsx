@@ -57,6 +57,10 @@ export const deleteProductImage = async (imageId) => {
 
 
 /////////////////////// ProductVariant ///////////////////////
+export const getAllProductVariants = async () => {
+  const res = await axiosClient.get(`/admin/products/variants/read`);
+  return res.data;
+};
 
 // Lấy tất cả variant theo productId
 export const getProductVariants = async (productId) => {

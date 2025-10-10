@@ -13,6 +13,8 @@ import java.util.Optional;
 public interface InventoryTransactionRepository extends JpaRepository<InventoryTransaction, Long> {
     Optional<InventoryTransaction> findByVariant_VariantId(Long variantId);
 
+    List<InventoryTransaction> findByVariant_VariantIdAndReferenceIdIsNull(Long variantId);
+
     // 3. Lịch sử nhập/xuất kho
     @Query(
             value = """

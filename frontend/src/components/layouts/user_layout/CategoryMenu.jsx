@@ -9,6 +9,7 @@ const CategoryMenu = ({ categories }) => {
 
   return (
     <div className={styles.wrapper}>
+    <h1 className="text-center">Danh mục</h1>
       <div className={styles.grid}>
         {allCategories.map((cat) => (
           <Link

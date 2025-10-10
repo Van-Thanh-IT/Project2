@@ -1,5 +1,6 @@
 package com.example.backend.entity;
 import com.example.backend.enums.OrderStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;

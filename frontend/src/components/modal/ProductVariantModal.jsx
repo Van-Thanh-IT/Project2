@@ -10,7 +10,9 @@ function ProductVariantModal({ show, onHide, product }) {
   useEffect(() => { if (show && product?.productId) loadVariants(product.productId); }, [show, product]);
 
   const loadVariants = async (productId) => {
-    try { const res = await getProductVariants(productId); setVariants(res.data || []); }
+    try { 
+      const res = await getProductVariants(productId); 
+      setVariants(res.data || []); }
     catch (err) { console.error("Lỗi load variant:", err); }
   };
 

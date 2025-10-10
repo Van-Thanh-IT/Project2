@@ -15,4 +15,5 @@ public class ProductVariantResponse {
     Double price;
     Double weight;
     Boolean isActive;
+    String productName;
 }

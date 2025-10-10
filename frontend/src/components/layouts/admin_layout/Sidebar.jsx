@@ -31,7 +31,6 @@ const Sidebar = () => {
     { name: "Quản lý Danh mục", path: "/admin/category", icon: <FaListAlt /> },
     { name: "Quản lý người dùng", path: "/admin/user", icon: <FaUsers /> },
     { name: "Quản lý đơn hàng", path: "/admin/order", icon: <FaShoppingCart /> },
-    { name: "Quản lý Thanh toán", path: "/admin/payment", icon: <FaMoneyCheckAlt /> },
     { name: "Quản lý đánh giá", path: "/admin/review", icon: <FaStar /> },
     { name: "Quản lý kho hàng", path: "/admin/inventory", icon: <FaWarehouse /> },
     { name: "Báo cáo & thống kê", path: "/admin/report_statistics", icon: <FaChartBar /> },

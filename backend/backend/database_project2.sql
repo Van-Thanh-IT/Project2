@@ -8,15 +8,17 @@ select * from roles;
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash TEXT NULL,
+    password_hash TEXT,
     full_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
+    facebook_id VARCHAR(255),
+    google_id VARCHAR(255),
+    provider ENUM('local','google','facebook') DEFAULT 'local',
     is_active BOOLEAN DEFAULT TRUE,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-ALTER TABLE users 
-ADD COLUMN facebook_id VARCHAR(255) UNIQUE AFTER google_id,     -- ID của người dùng trên Facebook
-MODIFY COLUMN provider ENUM('local','google','facebook') DEFAULT 'local';
+
 
 select * from users;
 
@@ -103,7 +105,7 @@ CREATE TABLE cart_items (
     FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id)
 );
 
-select * from cart_items ci ;
+select * from cart_items ci;
 
 CREATE TABLE locations (
     location_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -120,7 +122,7 @@ CREATE TABLE orders (
     user_id INT NOT NULL,
     location_id INT,
     code VARCHAR(50) NOT NULL UNIQUE,
-     status ENUM('PENDING','CONFIRMED','SHIPPED','DELIVERED','CANCELLED') NOT NULL DEFAULT 'PENDING',
+    status ENUM('PENDING','CONFIRMED','SHIPPED','DELIVERED','CANCELLED') NOT NULL DEFAULT 'PENDING',
     subtotal DECIMAL(12,2) NOT NULL,
     shipping_fee DECIMAL(12,2) NOT NULL,
     total DECIMAL(12,2) NOT NULL,
@@ -362,6 +364,63 @@ INSERT INTO locations (province, district, ward) VALUES
 ('Hải Phòng',     'Quận Lê Chân',       'Phường Dư Hàng'),
 ('Cần Thơ',       'Quận Ninh Kiều',     'Phường An Cư');
 
+INSERT INTO locations (province, district, ward) VALUES
+('Hà Nội', 'Quận Ba Đình', 'Phường Điện Biên'),
+('Hà Nội', 'Quận Đống Đa', 'Phường Ô Chợ Dừa'),
+('Hà Nội', 'Quận Tây Hồ', 'Phường Quảng An'),
+('Hà Nội', 'Quận Bắc Từ Liêm', 'Phường Cổ Nhuế 1'),
+('Hà Nội', 'Quận Bắc Từ Liêm', 'Phường Cổ Nhuế 2'),
+('Hà Nội', 'Quận Nam Từ Liêm', 'Phường Mỹ Đình 1'),
+('Hà Nội', 'Quận Nam Từ Liêm', 'Phường Mỹ Đình 2'),
+('Hà Nội', 'Quận Hai Bà Trưng', 'Phường Trần Hưng Đạo'),
+('Hà Nội', 'Quận Hai Bà Trưng', 'Phường Bạch Mai'),
+('Hà Nội', 'Quận Hoàng Mai', 'Phường Mai Động'),
+
+('TP. Hồ Chí Minh','Quận 3','Phường Võ Thị Sáu'),
+('TP. Hồ Chí Minh','Quận 3','Phường 7'),
+('TP. Hồ Chí Minh','Quận 3','Phường 8'),
+('TP. Hồ Chí Minh','Quận 10','Phường 14'),
+('TP. Hồ Chí Minh','Quận 10','Phường 15'),
+('TP. Hồ Chí Minh','Quận Phú Nhuận','Phường 17'),
+('TP. Hồ Chí Minh','Quận Phú Nhuận','Phường 9'),
+('TP. Hồ Chí Minh','Quận Tân Bình','Phường 4'),
+('TP. Hồ Chí Minh','Quận Tân Bình','Phường 5'),
+('TP. Hồ Chí Minh','Quận Thủ Đức','Phường Linh Xuân'),
+
+('Đà Nẵng','Quận Ngũ Hành Sơn','Phường Mỹ An'),
+('Đà Nẵng','Quận Ngũ Hành Sơn','Phường Khuê Mỹ'),
+('Đà Nẵng','Quận Liên Chiểu','Phường Hòa Khánh Bắc'),
+('Đà Nẵng','Quận Liên Chiểu','Phường Hòa Khánh Nam'),
+('Đà Nẵng','Quận Thanh Khê','Phường Xuân Hà'),
+('Đà Nẵng','Quận Thanh Khê','Phường Tân Chính'),
+('Đà Nẵng','Quận Thanh Khê','Phường Thạc Gián'),
+('Đà Nẵng','Quận Sơn Trà','Phường An Hải Tây'),
+('Đà Nẵng','Quận Sơn Trà','Phường Thọ Quang'),
+('Đà Nẵng','Quận Sơn Trà','Phường Mân Thái'),
+
+('Hải Phòng','Quận Ngô Quyền','Phường Máy Tơ'),
+('Hải Phòng','Quận Ngô Quyền','Phường Hàng Kênh'),
+('Hải Phòng','Quận Hồng Bàng','Phường Hạ Lý'),
+('Hải Phòng','Quận Hồng Bàng','Phường Hoàng Văn Thụ'),
+('Hải Phòng','Quận Kiến An','Phường Lãm Hà'),
+('Hải Phòng','Quận Kiến An','Phường Trần Thành Ngọ'),
+('Hải Phòng','Quận Hải An','Phường Thành Tô'),
+('Hải Phòng','Quận Hải An','Phường Nam Hải'),
+('Cần Thơ','Quận Bình Thủy','Phường Trà An'),
+('Cần Thơ','Quận Bình Thủy','Phường An Thới'),
+
+('Cần Thơ','Quận Cái Răng','Phường Lê Bình'),
+('Cần Thơ','Quận Cái Răng','Phường Hưng Phú'),
+('Cần Thơ','Quận Ô Môn','Phường Châu Văn Liêm'),
+('Cần Thơ','Quận Ô Môn','Phường Thới Hòa'),
+('Cần Thơ','Quận Thốt Nốt','Phường Thốt Nốt'),
+('Cần Thơ','Quận Thốt Nốt','Phường Thuận Hưng'),
+('Bắc Ninh','Thị xã Từ Sơn','Phường Đồng Kỵ'),
+('Bắc Ninh','Thị xã Từ Sơn','Phường Tương Giang'),
+('Bắc Ninh','Huyện Yên Phong','Phường Châu Khê'),
+('Bắc Ninh','Huyện Quế Võ','Phường Phượng Mao');
+
+
 
 -- Thêm 10 đơn hàng mẫu
 INSERT INTO orders (user_id, location_id, code, status, subtotal, shipping_fee, total, placed_at, shipping_address, full_name, phone)
@@ -432,4 +491,5 @@ VALUES
 (3, 8, 2, 'Đèn trang trí đẹp nhưng hơi mờ, nên tăng độ sáng.',      '2025-09-23 12:00:00'),
 (4, 9, 5, 'Tủ giày gỗ tự nhiên rất bền và đẹp.',                    '2025-09-24 09:50:00'),
 (5,10, 4, 'Bàn học chắc chắn, phù hợp trẻ em.',                     '2025-09-24 11:25:00');
+
 

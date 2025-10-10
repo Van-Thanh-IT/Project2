@@ -22,27 +22,16 @@ axiosClient.interceptors.request.use((config) => {
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      const url = error.config.url; // URL của request
+    const { config, response } = error;
 
-      // Chỉ hiển thị thông báo cho các endpoint admin hoặc user
-      const notifyUrls = [
-        "/users/profile",    // user cá nhân
-        "/admin/",           // admin
-      ];
-
-      const shouldNotify = notifyUrls.some((u) => url.startsWith(u));
-
-      if (shouldNotify) {
-        toast.info("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
-      }
-
-      // Luôn xóa token nếu hết hạn
+    if (response?.status === 401 && config.requiresAuth) {
+      toast.info("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
       localStorage.removeItem("token");
+      window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );
-
 
 export default axiosClient;

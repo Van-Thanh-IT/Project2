@@ -35,4 +35,18 @@ export const getProductsByCategorySlug = async (slug) => {
   }
 };
 
+
+export const createVnpayPayment = async (orderData) => {
+    const response = await axiosPublic.post("/payment/pay", orderData);
+    return response.data;
+};
+
+
+//lấy đánh giá theo productId
+export const getProductReviewStats = async (productId) =>{
+ const res = await axiosPublic.get(`/review/stats/${productId}`);
+  return res.data;
+}
+
+
 export default axiosPublic;
