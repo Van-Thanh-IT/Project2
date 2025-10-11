@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 @Data
@@ -31,6 +32,7 @@ public class Payment {
     Double amount;
 
     @Column(nullable = false)
+    @CreationTimestamp
     LocalDateTime paidAt;
 
 }
