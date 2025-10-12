@@ -51,7 +51,6 @@ public class CategoryService {
         String imageUrl = fileUploadUtil.saveFile(request.getImage());
         category.setImageUrl(imageUrl);
         category.setSlug(slug);
-        category.setIsActive(true);
         Integer maxSortOrder = categoryRepository.findMaxSortOrder();
         category.setSortOrder((maxSortOrder != null ? maxSortOrder : 0) + 1);
 

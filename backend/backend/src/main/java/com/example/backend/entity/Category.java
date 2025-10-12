@@ -3,6 +3,7 @@ package com.example.backend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -33,7 +34,8 @@ public class Category{
     Integer sortOrder = 0;
 
     @Column(name = "is_active", nullable = false)
-    Boolean isActive = true;
+    @ColumnDefault("true")
+    Boolean isActive;
 
     @Column(name = "image_url", length = 255)
     String imageUrl;
