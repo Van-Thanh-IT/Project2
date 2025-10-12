@@ -7,7 +7,6 @@ import com.example.backend.dto.response.CategoryResponse;
 import com.example.backend.entity.Category;
 import com.example.backend.mapper.CategoryMapper;
 import com.example.backend.repository.CategoryRepository;
-import com.example.backend.util.FileUploadUtil;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
