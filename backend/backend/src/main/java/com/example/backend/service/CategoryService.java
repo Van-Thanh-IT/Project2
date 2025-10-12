@@ -22,11 +22,8 @@ import java.util.List;
 @Service
 public class CategoryService {
     CategoryRepository categoryRepository;
-
     SlugUtil slugUtil;
     CategoryMapper categoryMapper;
-
-    FileUploadUtil fileUploadUtil;
     Cloudinaryutil cloudinaryutil;
 
     // lấy tất cả danh mục
@@ -84,9 +81,6 @@ public class CategoryService {
                 categoryRepository.existsBySlug(slug)) {
             throw new RuntimeException("Slug đã tồn tại!");
         }
-        //xóa file cũ khi update
-        fileUploadUtil.deleteFile(category.getImageUrl());
-
         //Upload ảnh
 //      String imageUrl = fileUploadUtil.saveFile(request.getImage());
         String imageUrl = cloudinaryutil.saveFile(request.getImage());
