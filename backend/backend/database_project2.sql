@@ -2,8 +2,6 @@ CREATE TABLE roles (
     role_id INT PRIMARY KEY AUTO_INCREMENT,
     role_name VARCHAR(100) NOT NULL
 );
-select * from roles;
-
 
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -19,9 +17,6 @@ CREATE TABLE users (
     last_login DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
-select * from users;
-
 CREATE TABLE user_roles (
     user_id INT NOT NULL,
     role_id INT NOT NULL,
@@ -29,7 +24,7 @@ CREATE TABLE user_roles (
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
-select * from user_roles;
+
 
 CREATE TABLE categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -43,7 +38,6 @@ CREATE TABLE categories (
     FOREIGN KEY (parent_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );
 
-select * from categories;
 
 CREATE TABLE products (
     product_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -58,7 +52,6 @@ CREATE TABLE products (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE SET NULL
 );
-select * from products p ;
 
 CREATE TABLE product_images (
     image_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -68,7 +61,6 @@ CREATE TABLE product_images (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
-SELECT * from product_images;
 
 
 CREATE TABLE product_variants (
@@ -81,8 +73,6 @@ CREATE TABLE product_variants (
     is_active BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
-select * from product_variants;
-
 
 
 CREATE TABLE carts (
@@ -92,7 +82,8 @@ CREATE TABLE carts (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
-select * from carts c ;
+
+
 CREATE TABLE cart_items (
     cart_item_id INT PRIMARY KEY AUTO_INCREMENT,
     cart_id INT NOT NULL,
@@ -105,17 +96,12 @@ CREATE TABLE cart_items (
     FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id)
 );
 
-select * from cart_items ci;
-
 CREATE TABLE locations (
     location_id INT PRIMARY KEY AUTO_INCREMENT,
     province VARCHAR(100),
     district VARCHAR(100),
     ward VARCHAR(100)
 );
-DELETE FROM locations;
-
-select * from locations;
 
 CREATE TABLE orders (
     order_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -134,11 +120,6 @@ CREATE TABLE orders (
     FOREIGN KEY (location_id) REFERENCES locations(location_id)
 );
 
-
-SELECT COALESCE(SUM(o.total),0) FROM Order o;
-
-select * from orders;
-
 CREATE TABLE order_items (
     order_item_id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT NOT NULL,
@@ -148,9 +129,6 @@ CREATE TABLE order_items (
     FOREIGN KEY (order_id) REFERENCES orders(order_id),
     FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id)
 );
-SELECT * From order_items;
-
-
 
 CREATE TABLE shipments (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -164,9 +142,6 @@ CREATE TABLE shipments (
 );
 
 
-
-select * from shipments;
-
 CREATE TABLE payments (
     id INT PRIMARY KEY AUTO_INCREMENT,
     order_id INT NOT NULL,
@@ -176,9 +151,6 @@ CREATE TABLE payments (
     paid_at DATETIME,
     FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
-
-
-select * from payments;
 
 CREATE TABLE reviews (
     review_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -193,9 +165,6 @@ CREATE TABLE reviews (
     INDEX idx_status (status) 
 );
 
-
-select * from reviews r ;
-
 CREATE TABLE inventory (
     inventory_id INT PRIMARY KEY AUTO_INCREMENT,      -- ID bản ghi tồn kho
     variant_id INT NOT NULL,                          -- Liên kết biến thể sản phẩm
@@ -206,7 +175,6 @@ CREATE TABLE inventory (
     updated_by INT,                                   -- ID nhân viên cập nhật tồn kho
     FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id)
 );
-select * from inventory;
 
 
 CREATE TABLE inventory_transactions (
@@ -223,24 +191,6 @@ CREATE TABLE inventory_transactions (
     FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id),
     FOREIGN KEY (created_by) REFERENCES users(user_id)
 );
-select * from inventory_transactions;
-
-SELECT 
-    t.transaction_id,
-    p.product_name,
-    v.color,
-    v.size,
-    t.transaction_type,
-    t.quantity,
-    t.transaction_source,
-    t.note,
-    u.full_name AS created_by,
-    t.transaction_date
-FROM inventory_transactions t
-JOIN product_variants v ON t.variant_id = v.variant_id
-JOIN products p ON v.product_id = p.product_id
-LEFT JOIN users u ON t.created_by = u.user_id
-ORDER BY t.transaction_date DESC;
 
 
 -- 15 dòng dữ liệu mẫu cho bảng categories (bán nội thất)

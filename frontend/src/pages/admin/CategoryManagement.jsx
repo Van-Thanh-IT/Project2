@@ -72,7 +72,7 @@ const CategoryManagement = () => {
       await loadCategories();
     } catch (error) {
       console.error("Lỗi khi submit:", error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi lưu danh mục!");
+      toast.error(error.response?.data?.messages || "Có lỗi xảy ra khi lưu danh mục!");
     }
   };
 
@@ -175,7 +175,7 @@ const CategoryManagement = () => {
                 <td>
                   {c.imageUrl && (
                     <img
-                      src={`http://localhost:8080${c.imageUrl}`}
+                      src={c.imageUrl}
                       alt={c.categoryName}
                       style={{ width: "50px", height: "50px", objectFit: "cover" }}
                     />

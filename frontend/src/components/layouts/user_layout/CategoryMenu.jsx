@@ -20,7 +20,7 @@ const CategoryMenu = ({ categories }) => {
             <div className={styles.card}>
               <div className={styles.imageWrapper}>
                 <img
-                  src={`http://localhost:8080${cat.imageUrl}`}
+                  src={`${cat.imageUrl}`}
                   alt={cat.categoryName}
                 />
               </div>

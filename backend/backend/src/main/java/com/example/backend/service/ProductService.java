@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.cloudinary.Cloudinary;
 import com.example.backend.dto.Inter.HomeProductProjection;
 import com.example.backend.dto.Inter.ProductReviewSummary;
 import com.example.backend.dto.requset.ProductImageRequest;
@@ -8,6 +9,7 @@ import com.example.backend.dto.response.ProductImageResponse;
 import com.example.backend.dto.response.ProductVariantResponse;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
+import com.example.backend.util.Cloudinaryutil;
 import com.example.backend.util.FileUploadUtil;
 import com.example.backend.util.SlugUtil;
 import com.example.backend.dto.requset.ProductRequest;
@@ -34,7 +36,7 @@ public class ProductService {
 
     ProductMapper productMapper;
     SlugUtil slugUtil;
-    FileUploadUtil fileUploadUtil;
+    Cloudinaryutil cloudinaryutil;
 
     // tìm kiếm sản phẩm
     public List<HomeProductProjection> searchProducts(String keyword) {
@@ -151,21 +153,34 @@ public class ProductService {
 
     //create productImage
     @Transactional
-    public ProductImage createProductImage(Long productId,ProductImageRequest request){
-       Product product = productRepository.findById(productId)
-               .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm có productId: " + productId));
+    public ProductImage createProductImage(Long productId, ProductImageRequest request) {
+        //Tìm sản phẩm
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm có productId: " + productId));
 
-       //upload ảnh
-        String imageUrl = fileUploadUtil.saveFile(request.getImage());
+        //Nếu là ảnh chính (isPrimary = true) → kiểm tra có ảnh chính cũ không
+        if (request.getIsPrimary() != null && request.getIsPrimary()) {
+            ProductImage existingPrimary = productImageRepository.findByProductIdAndIsPrimaryTrue(productId);
+            if (existingPrimary != null) {
+                //Xóa ảnh cũ khỏi Cloudinary
+                cloudinaryutil.deleteFile(existingPrimary.getImageUrl());
+                //Xóa khỏi DB
+                productImageRepository.delete(existingPrimary);
+            }
+        }
 
+        // Upload ảnh mới lên Cloudinary
+        String imageUrl = cloudinaryutil.saveFile(request.getImage());
+
+        //Tạo entity ProductImage mới
         ProductImage productImage = productMapper.toProductImage(request);
         productImage.setImageUrl(imageUrl);
         productImage.setProduct(product);
         productImage.setIsPrimary(request.getIsPrimary() != null ? request.getIsPrimary() : false);
 
         return productImageRepository.save(productImage);
-
     }
+
 
     @Transactional
     public ProductImage updateProductImage(Long imageId,ProductImageRequest request ){
@@ -174,8 +189,8 @@ public class ProductService {
 
 
         // Xóa file cũ
-        fileUploadUtil.deleteFile(existingImage.getImageUrl());
-        String imageUrl = fileUploadUtil.saveFile(request.getImage());
+        cloudinaryutil.deleteFile(existingImage.getImageUrl());
+        String imageUrl = cloudinaryutil.saveFile(request.getImage());
 
         // upload ảnh
         existingImage.setImageUrl(imageUrl);

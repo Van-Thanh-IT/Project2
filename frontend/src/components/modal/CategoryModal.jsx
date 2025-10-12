@@ -24,7 +24,7 @@ const CategoryModal = ({ show, onHide, onSubmit, form, handleChange, editingCate
             <Form.Label>Ảnh (chọn từ máy)</Form.Label>
             {editingCategory && editingCategory.imageUrl && (
               <div className="mb-2">
-                <img src={`http://localhost:8080${editingCategory.imageUrl}`} alt={editingCategory.categoryName} style={{ width: "100px", height: "100px", objectFit: "cover" }} />
+                <img src={editingCategory.imageUrl} alt={editingCategory.categoryName} style={{ width: "100px", height: "100px", objectFit: "cover" }} />
                 <p>Ảnh hiện tại. Chọn file mới để thay đổi.</p>
               </div>
             )}

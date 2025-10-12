@@ -18,8 +18,7 @@ function ProductDetail() {
   const [showModal, setShowModal] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [inStock, setInStock] = useState(true); // 🔴 tồn kho
-
+  const [inStock, setInStock] = useState(true); 
   // ⭐ Thêm state cho đánh giá
   const [rating, setRating] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
@@ -126,7 +125,7 @@ function ProductDetail() {
         {/* Hình ảnh */}
         <div className="col-md-5">
           <img
-            src={`http://localhost:8080${mainImage}`}
+            src={mainImage}
             alt={product.productName}
             style={{ width: "100%", borderRadius: "8px" }}
           />
@@ -134,7 +133,7 @@ function ProductDetail() {
             {product.images.map((img) => (
               <img
                 key={img.imageId}
-                src={`http://localhost:8080${img.imageUrl}`}
+                src={img.imageUrl}
                 alt=""
                 style={{
                   width: "60px",

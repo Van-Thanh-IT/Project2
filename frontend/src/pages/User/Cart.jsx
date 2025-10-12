@@ -126,7 +126,7 @@ const Cart = () => {
                   </td>
                   <td>
                     <Image
-                      src={`http://localhost:8080${item.imageUrl}`}
+                      src={item.imageUrl}
                       alt={item.productName}
                       style={{ width: "80px", height: "80px", objectFit: "cover" }}
                       rounded

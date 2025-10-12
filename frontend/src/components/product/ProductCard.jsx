@@ -37,7 +37,7 @@ function ProductCard({ product }) {
     >
       <Card.Img
         variant="top"
-        src={`http://localhost:8080${product.imageUrl}`}
+        src={product.imageUrl}
         alt={product.productName}
         style={{ height: "200px", objectFit: "cover" }}
       />

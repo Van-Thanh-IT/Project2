@@ -52,7 +52,7 @@ function ProductImageModal({ show, onHide, product }) {
             {images.map(img => (
               <tr key={img.imageId}>
                 <td>{img.imageId}</td>
-                <td><Image src={`http://localhost:8080${img.imageUrl}`} thumbnail width={100} /></td>
+                <td><Image src={img.imageUrl} thumbnail width={100} /></td>
                 <td>{img.isPrimary ? <span className="badge bg-success">Chính</span> : <span className="badge bg-warning">Phụ</span>}</td>
                 <td>
                   <Form.Control type="file" onChange={e => setUpdatedFiles(prev => ({ ...prev, [img.imageId]: { file: e.target.files[0], isPrimary: prev[img.imageId]?.isPrimary ?? img.isPrimary } }))} />

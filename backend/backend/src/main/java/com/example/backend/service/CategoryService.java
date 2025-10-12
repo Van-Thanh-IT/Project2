@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.util.Cloudinaryutil;
 import com.example.backend.util.SlugUtil;
 import com.example.backend.dto.requset.CategoryRequest;
 import com.example.backend.dto.response.CategoryResponse;
@@ -26,6 +27,7 @@ public class CategoryService {
     CategoryMapper categoryMapper;
 
     FileUploadUtil fileUploadUtil;
+    Cloudinaryutil cloudinaryutil;
 
     // lấy tất cả danh mục
     public List<CategoryResponse> getAllCategories() {
@@ -48,7 +50,7 @@ public class CategoryService {
 
         Category category = categoryMapper.toCategory(request);
 
-        String imageUrl = fileUploadUtil.saveFile(request.getImage());
+        String imageUrl = cloudinaryutil.saveFile(request.getImage());
         category.setImageUrl(imageUrl);
         category.setSlug(slug);
         Integer maxSortOrder = categoryRepository.findMaxSortOrder();
@@ -86,7 +88,8 @@ public class CategoryService {
         fileUploadUtil.deleteFile(category.getImageUrl());
 
         //Upload ảnh
-        String imageUrl = fileUploadUtil.saveFile(request.getImage());
+//      String imageUrl = fileUploadUtil.saveFile(request.getImage());
+        String imageUrl = cloudinaryutil.saveFile(request.getImage());
         category.setImageUrl(imageUrl);
 
         // Cập nhật thông tin
