@@ -15,7 +15,7 @@ import ExportCSV from "../../utils/exportCSV";
 import { getInfo } from "../../services/UserService";
 
 const InventoryManagement = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState([]);
   const [inventories, setInventories] = useState([]);
   const [productVariants, setProductVariants] = useState([]);      // ✅ Thêm state
   const [filteredInventories, setFilteredInventories] = useState([]);
