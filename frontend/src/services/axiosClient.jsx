@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 // https://male-dayna-vanthanh-02b52a66.koyeb.app
 //  http://localhost:8080
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://male-dayna-vanthanh-02b52a66.koyeb.app/api",
   headers: {
     "Content-Type": "application/json",
   },
