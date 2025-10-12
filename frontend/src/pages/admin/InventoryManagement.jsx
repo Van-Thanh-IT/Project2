@@ -12,10 +12,10 @@ import TransactionModal from "../../components/modal/TransactionModal";
 import { toast } from "react-toastify";
 import "../../styles/global.scss";
 import ExportCSV from "../../utils/exportCSV";
-
-const CURRENT_USER_ID = 28;
+import { getInfo } from "../../services/UserService";
 
 const InventoryManagement = () => {
+  const [user, setUser] = useState(null);
   const [inventories, setInventories] = useState([]);
   const [productVariants, setProductVariants] = useState([]);      // ✅ Thêm state
   const [filteredInventories, setFilteredInventories] = useState([]);
@@ -31,7 +31,7 @@ const InventoryManagement = () => {
     unitCost: 0,
     transactionSource: "PURCHASE",
     referenceId: null,
-    createdBy: CURRENT_USER_ID,
+    createdBy: user.userId,
     note: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,6 +43,20 @@ const InventoryManagement = () => {
     RETURN: "Trả hàng",
     ADJUSTMENT: "Điều chỉnh",
   };
+
+    // Lấy thông tin user
+    useEffect(() => {
+      const fetchUser = async () => {
+        try {
+          const res = await getInfo();
+          setUser(res.data);
+        } catch (err) {
+          console.error("Lỗi khi lấy thông tin user:", err);
+        }
+      };
+      fetchUser();
+    }, []);
+  
 
   // ✅ Fetch dữ liệu tồn kho & giao dịch & variants
   const fetchData = async () => {
@@ -108,7 +122,7 @@ const InventoryManagement = () => {
     setTransactionPayload({
       ...transactionPayload,
       variantId,
-      createdBy: CURRENT_USER_ID,
+      createdBy: user.userId,
       quantity: 0,
       unitCost: 0,
       transactionSource: "PURCHASE",
