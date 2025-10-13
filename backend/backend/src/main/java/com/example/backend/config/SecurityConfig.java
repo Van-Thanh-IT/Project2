@@ -78,46 +78,23 @@ public class SecurityConfig {
                 .build();
     }
 
-//    @Bean
-//    CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//
-//        // dùng allowedOriginPatterns để Spring Security chấp nhận cả production domain
-//        configuration.setAllowedOriginPatterns(List.of(
-//                "http://localhost:3000",
-//                "http://localhost:3001",
-//                "https://noi-that-rho.vercel.app"
-//        ));
-//        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-//        configuration.setAllowedHeaders(List.of("*"));
-//        configuration.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Cho phép tất cả origin
-        configuration.setAllowedOriginPatterns(List.of("*"));
-
-        // Cho phép tất cả method
+        // dùng allowedOriginPatterns để Spring Security chấp nhận cả production domain
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "https://noi-that-rho.vercel.app"
+        ));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
-
-        // Cho phép tất cả header
         configuration.setAllowedHeaders(List.of("*"));
-
-        // Cho phép credentials (cookies, Authorization header)
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
 
 }
