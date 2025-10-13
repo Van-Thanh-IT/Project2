@@ -41,6 +41,8 @@ public class SecurityConfig {
                          .requestMatchers("/api/home/**", "/api/auth/**",  "/uploads/**", "/api/cart/**" ).permitAll() // public
                          .requestMatchers("/api/admin/**").hasRole(RoleName.ADMIN.name())
                         .requestMatchers("/api/users/**").hasAnyRole(RoleName.USER.name(),RoleName.ADMIN.name())
+                         // cho phép tất cả OPTIONS request (preflight)
+                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                          .anyRequest().authenticated())
 
                  .exceptionHandling(ex -> ex
