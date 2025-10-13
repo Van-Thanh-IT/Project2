@@ -6,7 +6,7 @@ import {
   createTransaction,
 } from "../../services/InventoryService";
 import { getAllProductVariants } from "../../services/productService";
-import { Table, Button, Spinner, Form, Toast } from "react-bootstrap";
+import { Table, Button, Spinner, Form} from "react-bootstrap";
 import UpdateInventoryModal from "../../components/modal/UpdateInventoryModal";
 import TransactionModal from "../../components/modal/TransactionModal";
 import { toast } from "react-toastify";

@@ -4,8 +4,6 @@ import Header from "./Header";
 import Footer from "./Footer";
 import HomeIntro from "./HomeIntro";
 import ScrollToTop from "./ScrollToTop";
-import Banner from "./Banner";
-
 
 const UserMainLayout = () => {
   return (

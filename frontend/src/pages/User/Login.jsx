@@ -4,7 +4,7 @@ import { login, loginWithGoogle, loginWithFacebook } from "../../services/Authen
 import { getInfo } from "../../services/UserService";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
-import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
+import FacebookLogin from "@greatsumini/react-facebook-login";
 import ForgotPasswordModal from "../../components/modal/ForgotPasswordModal";
 import { Button } from "react-bootstrap";
 
@@ -87,10 +87,6 @@ const Login = () => {
   const handleGoogleError = () => toast.error("Không thể đăng nhập bằng Google!");
 
   const handleFacebookResponse = async (response) => {
-    if (!response.accessToken) {
-      toast.error("Đăng nhập Facebook thất bại hoặc bị hủy!");
-      return;
-    }
     try {
       const res = await loginWithFacebook(response.accessToken);
       const token = res?.data?.token;
@@ -156,17 +152,11 @@ const Login = () => {
 
           <FacebookLogin
             appId="2016734672462629"
-            autoLoad={false}
-            fields="name,email,picture"
-            callback={handleFacebookResponse}
-            render={(renderProps) => (
-              <button
-                className="btn btn-primary w-100"
-                onClick={renderProps.onClick}
-              >
-                Đăng nhập với Facebook
-              </button>
-            )}
+            onSuccess={handleFacebookResponse}
+            onFail={(err) => toast.error("Đăng nhập Facebook thất bại!")}
+            onProfileSuccess={handleFacebookResponse}
+            theme="light_blue" 
+            textButton="Đăng nhập với Facebook"
           />
         </div>
 
