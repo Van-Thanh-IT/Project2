@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Tạo axios client riêng cho các request public
 const axiosPublic = axios.create({
-  baseURL: "http://localhost:8080/api/home", 
+  baseURL: "https://project2-y0u9.onrender.com/api/home", 
   headers: {
     "Content-Type": "application/json",
   },

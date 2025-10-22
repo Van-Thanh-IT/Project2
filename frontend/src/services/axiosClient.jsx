@@ -3,8 +3,9 @@ import axios from "axios";
 import { toast } from "react-toastify";
 // https://male-dayna-vanthanh-02b52a66.koyeb.app
 //  http://localhost:8080
+// https://project2-y0u9.onrender.com/
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://project2-y0u9.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },

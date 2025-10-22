@@ -27,6 +27,8 @@ function ProductCard({ product }) {
     navigate(`/product/${product.slug}`);
   };
 
+  console.log(product)
+
   return (
     <motion.div
      whileHover={{ scale: 1.05, boxShadow: "0px 8px 20px rgba(0,0,0,0.15)" }}
@@ -37,6 +39,7 @@ function ProductCard({ product }) {
       <Card className="shadow-sm border-0 rounded-3 h-100">
         <Card.Img
           variant="top"
+          
           src={product.imageUrl}
           alt={product.productName}
           style={{ height: "200px", objectFit: "cover" }}
