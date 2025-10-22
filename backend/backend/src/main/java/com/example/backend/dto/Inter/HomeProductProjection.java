@@ -14,5 +14,6 @@ public interface HomeProductProjection {
     String getBrand();
     String getImageUrl();       // ảnh primary
     Long getCategoryId();
+    Long getTotalSold();
 
 }

@@ -34,7 +34,6 @@ public class Category{
     Integer sortOrder = 0;
 
     @Column(name = "is_active", nullable = false)
-    @ColumnDefault("true")
     Boolean isActive;
 
     @Column(name = "image_url", length = 255)

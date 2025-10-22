@@ -34,6 +34,7 @@ public class Product {
     @Column(nullable = false, unique = true, length = 150)
     String slug;
 
+    @Column(name = "is_active")
     Boolean isActive;
 
     @Column(updatable = false, insertable = false)

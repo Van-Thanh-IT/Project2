@@ -51,6 +51,7 @@ public class CategoryService {
         category.setSlug(slug);
         Integer maxSortOrder = categoryRepository.findMaxSortOrder();
         category.setSortOrder((maxSortOrder != null ? maxSortOrder : 0) + 1);
+        category.setIsActive(true);
 
         // Gán cha nếu có
         if (request.getParentId() != null) {
@@ -90,6 +91,7 @@ public class CategoryService {
         category.setSlug(slug);
         Integer maxSortOrder = categoryRepository.findMaxSortOrder();
         category.setSortOrder((maxSortOrder != null ? maxSortOrder : 0) + 1);
+        category.setIsActive(true);
 
         // Cập nhật cha nếu có
         if (request.getParentId() != null) {
@@ -110,7 +112,7 @@ public class CategoryService {
                 .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
 
         if (!category.getChildren().isEmpty() && !isActive) {
-            throw new RuntimeException("Danh mục có danh mục con, không thể ẩn");
+            throw new RuntimeException("Danh mục có danh mục con, không thể xóa");
         }
 
         category.setIsActive(isActive);

@@ -7,10 +7,7 @@ import com.example.backend.enums.ShipmentStatus;
 import com.example.backend.enums.TransactionSource;
 import com.example.backend.enums.TransactionType;
 import com.example.backend.mapper.OrderMapper;
-import com.example.backend.repository.InventoryRepository;
-import com.example.backend.repository.InventoryTransactionRepository;
-import com.example.backend.repository.OrderRepository;
-import com.example.backend.repository.ShipmentRepository;
+import com.example.backend.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,18 +35,20 @@ public class OrderService {
         Order order = orderMapper.toOrder(request);
         order.setPlacedAt(LocalDateTime.now());
 
-        // map items
+        // Map items và xử lý tồn kho
         List<OrderItem> items = request.getItems().stream()
                 .map(orderMapper::toOrderItem)
                 .peek(item -> {
                     item.setOrder(order);
 
+                    // Tìm tồn kho theo variant
                     Inventory inventory = inventoryRepository
                             .findByVariant_VariantId(item.getVariant().getVariantId())
-                            .orElseThrow(() -> new RuntimeException("Không tìm thấy kho"));
+                            .orElseThrow(() -> new RuntimeException("Không tìm thấy kho cho variant: " + item.getVariant().getVariantId()));
 
+                    // Kiểm tra tồn kho
                     if (inventory.getQuantity() < item.getQuantity()) {
-                        throw new RuntimeException("Số lượng trong kho không đủ: " + item.getVariant().getVariantId());
+                        throw new RuntimeException("Số lượng trong kho không đủ cho variant: " + item.getVariant().getVariantId());
                     }
 
                     // Giảm tồn kho
@@ -58,18 +57,22 @@ public class OrderService {
                     inventory.setUpdatedBy(request.getUserId());
                     inventoryRepository.save(inventory);
 
-                    // Ghi lịch sử
+                    // Ghi lịch sử giao dịch kho
                     InventoryTransaction transaction = new InventoryTransaction();
                     transaction.setVariant(item.getVariant());
                     transaction.setTransactionType(TransactionType.EXPORT);
                     transaction.setQuantity(item.getQuantity());
                     transaction.setTransactionSource(TransactionSource.SALE);
-                    transaction.setReferenceId(order.getOrderId());
+                    transaction.setUnitCost(item.getPrice()); // dùng giá sản phẩm chứ không phải tổng đơn
+                    transaction.setReferenceId(request.getOrderId());
                     transaction.setCreatedBy(request.getUserId());
                     transaction.setTransactionDate(LocalDateTime.now());
                     inventoryTransactionRepository.save(transaction);
 
                 }).collect(Collectors.toList());
+
+        // Gắn lại vào order
+        order.setOrderItems(items);
 
         // map shipments
         if (request.getShipments() != null) {
@@ -91,11 +94,11 @@ public class OrderService {
             );
         }
 
-        //Lưu order
+        // Lưu order
         Order savedOrder = orderRepository.save(order);
         log.info("Tạo đơn thành công: {}", savedOrder.getCode());
 
-        //Xoá giỏ hàng của user sau khi đặt hàng thành công
+        // Xoá giỏ hàng của user sau khi đặt hàng
         Long userId = request.getUserId();
         List<Long> variantIds = request.getItems().stream()
                 .map(item -> item.getVariantId().longValue())
@@ -104,6 +107,7 @@ public class OrderService {
 
         return orderMapper.toOrderResponse(savedOrder);
     }
+
 
     // lấy danh sách oder theo user
     public List<OrderResponse> getOrdersByUser(Integer userId) {
@@ -175,9 +179,6 @@ public class OrderService {
 
         return shipmentRepository.save(shipment);
     }
-
-
-
 
 
 }

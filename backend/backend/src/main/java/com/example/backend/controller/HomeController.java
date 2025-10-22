@@ -141,6 +141,13 @@ public class HomeController {
         return locationService.getAllLocations();
     }
 
+
+    @GetMapping("/product/top-selling")
+    public APIResponse<List<HomeProductProjection>> getTopSellingProducts() {
+        List<HomeProductProjection> list = productService.getTopSellingProducts();
+        return APIResponse.success(list);
+    }
+
     @GetMapping("/products/read")
     public APIResponse<List<HomeProductProjection>> getAllProductTrue(){
        List<HomeProductProjection> responses = productService.getHomeAllProducts();

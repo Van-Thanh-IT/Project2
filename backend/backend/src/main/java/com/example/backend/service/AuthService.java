@@ -205,7 +205,8 @@ public class AuthService {
                     .build();
 
         } catch (Exception e) {
-            throw new RuntimeException("Tài khoản chưa được xác thực", e);
+            e.printStackTrace(); // In ra log thật
+            throw new RuntimeException("Tài khoản chưa được xác thực" + e.getMessage(), e);
         }
     }
 
@@ -261,7 +262,8 @@ public class AuthService {
             return AuthenticationResponse.builder().token(token).build();
 
         } catch (Exception e) {
-            throw new RuntimeException("Facebook login failed", e);
+            e.printStackTrace(); // In ra log thật
+            throw new RuntimeException("Tài khoản chưa được xác thực" + e.getMessage(), e);
         }
     }
 

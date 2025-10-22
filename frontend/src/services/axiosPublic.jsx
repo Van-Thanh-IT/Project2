@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Tạo axios client riêng cho các request public
 const axiosPublic = axios.create({
-  baseURL: "https://male-dayna-vanthanh-02b52a66.koyeb.app/api/home", 
+  baseURL: "http://localhost:8080/api/home", 
   headers: {
     "Content-Type": "application/json",
   },
@@ -47,6 +47,8 @@ export const getProductReviewStats = async (productId) =>{
  const res = await axiosPublic.get(`/review/stats/${productId}`);
   return res.data;
 }
+
+
 
 
 export default axiosPublic;

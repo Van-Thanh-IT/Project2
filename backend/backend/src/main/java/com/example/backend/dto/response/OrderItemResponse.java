@@ -15,4 +15,6 @@ public class OrderItemResponse {
     String variantSize;
     BigDecimal price;
     Integer quantity;
+
+    Long productId;
 }

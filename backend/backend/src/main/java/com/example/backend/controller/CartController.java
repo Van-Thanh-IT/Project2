@@ -17,7 +17,7 @@ public class CartController {
     // Lấy giỏ hàng của người dùng
     @GetMapping("/{userId}")
     public CartResponse getCart(@PathVariable Long userId) {
-        return cartService.getCart(userId);
+        return cartService.getCartByUser(userId);
     }
 
 

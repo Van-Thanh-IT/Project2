@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getInfo } from "../../../services/UserService";
+import { FaUser } from "react-icons/fa";
 
 const Topbar = () => {
   const [user, setUser] = useState(null); 
@@ -42,7 +43,7 @@ const Topbar = () => {
       {message && <h1 className="bg-danger text-white text-center mb-2">{message}</h1>}
       <div className="container-fluid justify-content-end">
         <div className="d-flex align-items-center">
-          {user && <span className="me-2 fw-semibold">Xin chào: {user.fullName}</span>}
+          {user && <span className="me-2 fw-semibold fs-4"> <FaUser className="me-2"/>{user.fullName}</span>}
         </div>
       </div>
     </nav>

@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Set;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,9 +27,9 @@ public class ApplicationInitConfig {
     private final RoleRepository roleRepository;
 
     @Bean
-    ApplicationRunner applicationRunner(UserRepository userRepository){
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            // Thêm ADMIN cho roles nếu chưa có
+            //Tạo role ADMIN nếu chưa có ---
             Role adminRole = roleRepository.findByRoleName(RoleName.ADMIN.name())
                     .orElseGet(() -> {
                         Role role = new Role();
@@ -36,20 +37,29 @@ public class ApplicationInitConfig {
                         return roleRepository.save(role);
                     });
 
-            // Seed admin user nếu chưa có
-            if(userRepository.findByEmail("lovanthanh34523@gmail.com").isEmpty()){
+            // Tạo role USER nếu chưa có ---
+            Role userRole = roleRepository.findByRoleName(RoleName.USER.name())
+                    .orElseGet(() -> {
+                        Role role = new Role();
+                        role.setRoleName(RoleName.USER.name());
+                        return roleRepository.save(role);
+                    });
+
+            //Seed tài khoản admin nếu chưa có ---
+            if (userRepository.findByEmail("lovanthanh34523@gmail.com").isEmpty()) {
                 User admin = new User();
-                admin.setFullName("admin");
+                admin.setFullName("Admin");
                 admin.setEmail("lovanthanh34523@gmail.com");
                 admin.setPassword(passwordEncoder.encode("admin12345"));
                 admin.setIsActive(true);
                 admin.setCreatedAt(LocalDateTime.now());
-                admin.setRoles(new HashSet<>(){{ add(adminRole);}});
-
+                admin.setRoles(new HashSet<>(Set.of(adminRole)));
                 userRepository.save(admin);
-                log.warn("Admin user has been created with default password: admin12345, please change it");
+
+                System.out.println("✅ Admin user has been created with default password: admin12345");
             }
         };
     }
+
 }
 

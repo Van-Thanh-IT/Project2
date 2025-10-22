@@ -4,37 +4,31 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderRequest {
-    Long userId; // nếu khách đã đăng nhập
+    Long orderId;
+    Long userId;
     String code;
     Double subtotal;
     Double shippingFee;
-    Double total;
+    BigDecimal total;
     LocalDateTime placedAt;
 
     String shippingAddress;
     String fullName; // nếu chưa login
     String phone;
-
-    LocationRequest location;
+    Integer locationId;
 
     List<OrderItemRequest> items;
     List<ShipmentRequest> shipments;
     List<PaymentRequest> payments;
 
 
-    @Data
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class LocationRequest {
-        String province;
-        String district;
-        String ward;
-    }
 
     @Data
     @FieldDefaults(level = AccessLevel.PRIVATE)

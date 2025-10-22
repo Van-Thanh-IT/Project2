@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCart, removeCartItem } from "../../services/CartService";
+import { getCart, removeCartItem, addToCart } from "../../services/CartService";
 import { Button, Spinner, Alert, Image, Form } from "react-bootstrap";
 import CheckoutModal from "../../components/modal/CheckoutModal";
 import { getInfo } from "../../services/UserService";
@@ -13,15 +13,15 @@ const Cart = () => {
 
   // Lấy thông tin user
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchCurrentUser = async () => {
       try {
-        const res = await getInfo();
-        setUser(res.data);
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin user:", err);
+        const response = await getInfo();
+        setUser(response.data);
+      } catch (error) {
+        console.error("Failed to fetch current user", error);
       }
     };
-    fetchUser();
+    fetchCurrentUser();
   }, []);
 
   // Lấy giỏ hàng
@@ -47,17 +47,21 @@ const Cart = () => {
   // Khi cart thay đổi, mặc định chọn tất cả sản phẩm
   useEffect(() => {
     if (cart?.items) {
-      const defaultSelected = new Set(cart.items.map(item => item.cartItemId));
+      const defaultSelected = new Set(
+        cart.items.map((item) => item.cartItemId)
+      );
       setSelectedItems(defaultSelected);
     }
   }, [cart]);
 
   // Xoá sản phẩm
   const handleRemove = async (cartItemId) => {
+    if (!window.confirm("Xác nhận xóa?")) return;
     try {
       const updated = await removeCartItem(user.userId, cartItemId);
       setCart(updated);
-      setSelectedItems(prev => {
+      window.dispatchEvent(new Event("cartUpdated"));
+      setSelectedItems((prev) => {
         const copy = new Set(prev);
         copy.delete(cartItemId);
         return copy;
@@ -69,21 +73,20 @@ const Cart = () => {
   };
 
   // Toggle chọn sản phẩm
-  const handleSelectItem = (cartItemId) => {
-    setSelectedItems(prev => {
-      const copy = new Set(prev);
-      if (copy.has(cartItemId)) {
-        copy.delete(cartItemId);
-      } else {
-        copy.add(cartItemId);
-      }
-      return copy;
-    });
+  const handleSelectItem = async (cartItemId) => {
+    const prevSet = selectedItems;
+    const newSet = new Set(prevSet);
+    if (newSet.has(cartItemId)) {
+      newSet.delete(cartItemId);
+    } else {
+      newSet.add(cartItemId);
+    }
+    setSelectedItems(newSet);
   };
 
   // Tính tổng tiền live
   const totalPayment = cart?.items
-    .filter(item => selectedItems.has(item.cartItemId))
+    .filter((item) => selectedItems.has(item.cartItemId))
     .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   if (!user) return <Spinner animation="border" />;
@@ -128,7 +131,11 @@ const Cart = () => {
                     <Image
                       src={item.imageUrl}
                       alt={item.productName}
-                      style={{ width: "80px", height: "80px", objectFit: "cover" }}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        objectFit: "cover",
+                      }}
                       rounded
                     />
                   </td>
@@ -177,7 +184,9 @@ const Cart = () => {
           <CheckoutModal
             show={showCheckout}
             onHide={() => setShowCheckout(false)}
-            cartItems={cart.items.filter(item => selectedItems.has(item.cartItemId))}
+            cartItems={cart.items.filter((item) =>
+              selectedItems.has(item.cartItemId)
+            )}
             userId={user.userId}
             onOrderSuccess={() => {
               getCart(user.userId).then((res) => setCart(res));

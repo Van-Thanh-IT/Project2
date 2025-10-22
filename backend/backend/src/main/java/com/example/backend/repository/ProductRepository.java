@@ -12,30 +12,75 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-        // lấy thông tin sp
-        @Query(
-                value = """
+        // Sản phẩm bán chạy
+        @Query(value = """
             SELECT 
                 p.product_id AS productId,
                 p.product_name AS productName,
-                p.description as description,
-                p.material as material,
+                p.description AS description,
+                p.material AS material,
                 p.slug AS slug,
                 p.price AS price,
                 p.brand AS brand,
                 pi.image_url AS imageUrl,
-                p.category_id AS categoryId
+                p.category_id AS categoryId,
+                c.category_name AS categoryName,
+                COALESCE(SUM(oi.quantity), 0) AS totalSold
             FROM products p
+            LEFT JOIN product_variants v ON v.product_id = p.product_id
+            LEFT JOIN order_items oi ON oi.variant_id = v.variant_id
+            LEFT JOIN orders o ON o.order_id = oi.order_id AND o.status = 'DELIVERED'
             LEFT JOIN (
                 SELECT product_id, MIN(image_url) AS image_url
                 FROM product_images
                 WHERE is_primary = true
                 GROUP BY product_id
             ) pi ON pi.product_id = p.product_id
+            LEFT JOIN categories c ON c.category_id = p.category_id
             WHERE p.is_active = true
-        """,
-                nativeQuery = true
-        )
+            GROUP BY p.product_id, p.product_name, p.description, p.material, 
+                     p.slug, p.price, p.brand, pi.image_url, p.category_id, 
+                     c.category_name
+            HAVING COALESCE(SUM(oi.quantity), 0) >= 20  -- 🔹 sản phẩm bán chạy
+            ORDER BY totalSold DESC
+            LIMIT 8
+        """, nativeQuery = true)
+        List<HomeProductProjection> findTopSellingProductsForHome();
+
+
+        // Sản phẩm thường
+        @Query(value = """
+            SELECT 
+                p.product_id AS productId,
+                p.product_name AS productName,
+                p.description AS description,
+                p.material AS material,
+                p.slug AS slug,
+                p.price AS price,
+                p.brand AS brand,
+                pi.image_url AS imageUrl,
+                p.category_id AS categoryId,
+                c.category_name AS categoryName,
+                COALESCE(SUM(oi.quantity), 0) AS totalSold
+            FROM products p
+            LEFT JOIN product_variants v ON v.product_id = p.product_id
+            LEFT JOIN order_items oi ON oi.variant_id = v.variant_id
+            LEFT JOIN orders o ON o.order_id = oi.order_id AND o.status = 'DELIVERED'
+            LEFT JOIN (
+                SELECT product_id, MIN(image_url) AS image_url
+                FROM product_images
+                WHERE is_primary = true
+                GROUP BY product_id
+            ) pi ON pi.product_id = p.product_id
+            LEFT JOIN categories c ON c.category_id = p.category_id
+            WHERE p.is_active = true
+            GROUP BY p.product_id, p.product_name, p.description, p.material, 
+                     p.slug, p.price, p.brand, pi.image_url, p.category_id, 
+                     c.category_name
+            HAVING COALESCE(SUM(oi.quantity), 0) < 20  
+            ORDER BY totalSold DESC
+            LIMIT 20
+        """, nativeQuery = true)
         List<HomeProductProjection> findAllActiveHomeProductsNative();
 
         // tìm kiếm sản pẩm

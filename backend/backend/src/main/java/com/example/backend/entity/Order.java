@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 @Data
@@ -14,9 +15,7 @@ import java.util.List;
 @Table(name = "orders")
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long orderId;
-
     @Column(unique = true, nullable = false)
     String code;
 
@@ -31,7 +30,7 @@ public class Order {
     Double shippingFee;
 
     @Column(nullable = false)
-    Double total;
+    BigDecimal total;
 
     @Column(nullable = false)
     LocalDateTime placedAt;

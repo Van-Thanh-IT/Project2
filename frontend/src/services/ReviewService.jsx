@@ -2,15 +2,8 @@ import axiosClient from "./axiosClient";
 
 // Tạo review mới
 export const createReview = async (payload) => {
-  // payload: { userId, productId, rating, comment }
+  console.log("nhận dc từ đánh giá: ", payload);
   const res = await axiosClient.post("/users/reviews/create", payload);
-  return res.data;
-};
-
-// Cập nhật review
-export const updateReview = async (reviewId, payload) => {
-  
-  const res = await axiosClient.put(`/users/reviews/${reviewId}/update`, payload);
   return res.data;
 };
 

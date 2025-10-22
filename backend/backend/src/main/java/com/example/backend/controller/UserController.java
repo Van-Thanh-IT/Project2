@@ -46,16 +46,6 @@ public class UserController {
                 .build();
     }
 
-    // Xóa user
-    @DeleteMapping("/delete/{id}")
-    public APIResponse<Void> deleteUser(@PathVariable("id") Long userId) {
-        userService.deleteUser(userId);
-        return APIResponse.<Void>builder()
-                .code(200)
-                .messages("Xóa người dùng thành công!")
-                .build();
-    }
-
     // Khóa/Mở khóa user
     @PutMapping("/{id}/toggle-active")
     public APIResponse<UserResponse> toggleActive(@PathVariable("id") Long userId) {

@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,7 +47,7 @@ public class CartService {
     }
 
     // Lấy giỏ hàng
-    public CartResponse getCart(Long userId) {
+    public CartResponse getCartByUser(Long userId) {
         Cart cart = getOrCreateCart(userId);
         return cartMapper.toCartResponse(cart);
     }

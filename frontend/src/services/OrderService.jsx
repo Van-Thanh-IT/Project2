@@ -26,11 +26,6 @@ export const cancelOrder = async (orderId) => {
   return res.data;
 };
 
-// // Đánh dấu thanh toán đã trả
-// export const markPaymentPaid = async (paymentId) => {
-//   const res = await axiosClient.put(`/admin/payments/${paymentId}/paid`);
-//   return res.data;
-// };
 
 // Cập nhật vận chuyển
 export const updateShipment = async (shipmentId, payload) => {

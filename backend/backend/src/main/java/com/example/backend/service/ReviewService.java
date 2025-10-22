@@ -6,7 +6,6 @@ import com.example.backend.dto.response.ReviewResponse;
 import com.example.backend.entity.Product;
 import com.example.backend.entity.Review;
 import com.example.backend.entity.User;
-import com.example.backend.enums.OrderStatus;
 import com.example.backend.enums.ReviewStatus;
 import com.example.backend.mapper.ReviewMapper;
 import com.example.backend.repository.ProductRepository;
@@ -37,20 +36,23 @@ public class ReviewService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm nào để đánh giá"));
 
+        review.setStatus(ReviewStatus.PENDING);
         review.setUser(user);
         review.setProduct(product);
 
         return reviewMapper.toReviewResponse(reviewRepository.save(review));
     }
 
-    // Update
-    public ReviewResponse update(Long id, ReviewRequest request) {
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy Id: " + id));
 
-        review.setRating(request.getRating());
-        review.setComment(request.getComment());
-        return reviewMapper.toReviewResponse(reviewRepository.save(review));
+    // Update
+    public ReviewResponse updateReview(Long reviewId, ReviewRequest request) {
+        Review existingReview = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+
+        existingReview.setRating(request.getRating());
+        existingReview.setComment(request.getComment());
+
+        return reviewMapper.toReviewResponse(reviewRepository.save(existingReview));
     }
 
     // Delete
@@ -76,11 +78,6 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    // Get by Id
-    public ReviewResponse getById(Long id) {
-        return reviewMapper.toReviewResponse(reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found")));
-    }
 
     // Get all
     public List<ReviewResponse> getAll() {

@@ -19,11 +19,6 @@ public class Cloudinaryutil {
             @Value("${cloudinary.api_key}") String apiKey,
             @Value("${cloudinary.api_secret}") String apiSecret
     ) {
-        System.out.println("🔧 [Cloudinary Config]");
-        System.out.println("   CLOUD_NAME = " + cloudName);
-        System.out.println("   API_KEY    = " + apiKey);
-        System.out.println("   API_SECRET = " + (apiSecret != null && !apiSecret.isEmpty() ? "***HIDDEN***" : "NULL ❌"));
-
         this.cloudinary = new Cloudinary(ObjectUtils.asMap(
                 "cloud_name", cloudName,
                 "api_key", apiKey,

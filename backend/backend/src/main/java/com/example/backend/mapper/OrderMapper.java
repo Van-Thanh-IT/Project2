@@ -18,6 +18,7 @@ import java.util.List;
 public interface OrderMapper {
     // Request → Entity
     @Mapping(target = "user.userId", source = "userId")
+    @Mapping(target = "location.locationId", source = "locationId")
     Order toOrder(OrderRequest request);
     @Mapping(target = "variant.variantId", source = "variantId")
     OrderItem toOrderItem(OrderRequest.OrderItemRequest request);
@@ -25,6 +26,7 @@ public interface OrderMapper {
     Shipment toShipment(ShipmentRequest request);
 
     Payment toPayment(PaymentRequest request);
+    @Mapping(target = "productId", source = "variant.product.productId")
     @Mapping(target = "productName", source = "variant.product.productName")
     @Mapping(target = "variantColor", source = "variant.color")
     @Mapping(target = "variantSize", source = "variant.size")

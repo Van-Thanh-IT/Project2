@@ -1,5 +1,6 @@
 import React from "react";
-import { Modal, Button, Form } from "react-bootstrap";
+import { Modal, Button, Form, Badge } from "react-bootstrap";
+import Select from "react-select";
 
 const transactionTypeVN = {
   IMPORT: "Nhập",
@@ -13,34 +14,58 @@ const transactionSourceVN = {
   ADJUSTMENT: "Điều chỉnh",
 };
 
-const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants }) => {
+const renderStatusBadge = (status) => {
+    switch (status) {
+      case "PENDING":
+        return <Badge bg="secondary">Đang chờ xác nhận</Badge>;
+      case "CONFIRMED":
+        return <Badge bg="info">Đã xác nhận</Badge>;
+      case "SHIPPED":
+        return <Badge bg="warning" text="dark">Đang vận chuyển</Badge>;
+      case "DELIVERED":
+        return <Badge bg="success">Đã giao</Badge>;
+      case "CANCELLED":
+        return <Badge bg="danger">Đã hủy</Badge>;
+      default:
+        return <Badge bg="dark">Không hợp lệ</Badge>;
+    }
+  };
+
+const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants, orders }) => {
   if (!payload) return null;
 
   return (
-    <Modal show={show} onHide={onHide}>
+    <Modal show={show} onHide={onHide} size="xl">
       <Modal.Header closeButton>
         <Modal.Title>Nhập/Xuất kho</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
-          {/*Chọn biến thể sản phẩm */}
+          {/* Biến thể sản phẩm */}
           <Form.Group className="mb-3">
             <Form.Label>Biến thể sản phẩm</Form.Label>
-            <Form.Select
-              value={payload.variantId || ""}
-              onChange={(e) =>
-                onChange({ ...payload, variantId: parseInt(e.target.value) })
+            <Select
+              options={variants.map(v => ({
+                value: v.variantId,
+                label: `${v.productName} - ${v.color}/${v.size}`,
+              }))}
+              value={
+                payload.variantId
+                  ? {
+                      value: payload.variantId,
+                      label: `${variants.find(v => v.variantId === payload.variantId)?.productName} - ${variants.find(v => v.variantId === payload.variantId)?.color}/${variants.find(v => v.variantId === payload.variantId)?.size}`
+                    }
+                  : null
               }
-            >
-              <option value="">-- Chọn biến thể --</option>
-              {variants.map((v) => (
-                <option key={v.variantId} value={v.variantId}>
-                  {v.productName} - {v.color}/{v.size}
-                </option>
-              ))}
-            </Form.Select>
+              onChange={(selected) =>
+                onChange({ ...payload, variantId: selected ? selected.value : null })
+              }
+              placeholder="Tìm kiếm và chọn biến thể..."
+              isClearable
+            />
           </Form.Group>
 
+          {/* Loại giao dịch */}
           <Form.Group className="mb-3">
             <Form.Label>Loại giao dịch</Form.Label>
             <Form.Select
@@ -53,6 +78,7 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants 
             </Form.Select>
           </Form.Group>
 
+          {/* Số lượng */}
           <Form.Group className="mb-3">
             <Form.Label>Số lượng</Form.Label>
             <Form.Control
@@ -62,6 +88,7 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants 
             />
           </Form.Group>
 
+          {/* Đơn giá */}
           <Form.Group className="mb-3">
             <Form.Label>Đơn giá</Form.Label>
             <Form.Control
@@ -71,6 +98,7 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants 
             />
           </Form.Group>
 
+          {/* Nguồn giao dịch */}
           <Form.Group className="mb-3">
             <Form.Label>Nguồn giao dịch</Form.Label>
             <Form.Select
@@ -83,15 +111,48 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants 
             </Form.Select>
           </Form.Group>
 
+          {/* Tham chiếu đơn hàng */}
           <Form.Group className="mb-3">
-            <Form.Label>Tham chiếu (ID đơn hàng, phiếu,...)</Form.Label>
-            <Form.Control
-              type="number"
-              value={payload.referenceId || ""}
-              onChange={(e) => onChange({ ...payload, referenceId: parseInt(e.target.value) || null })}
+            <Form.Label>Tham chiếu (ID đơn hàng)</Form.Label>
+            <Select
+              options={orders.map(o => ({
+                value: o.orderId,
+                label: (
+                  <div className="d-flex align-items-center justify-content-between">
+                    <span>
+                      Mã: {o.orderId} - khách hàng: {o.fullName}
+                    </span>
+                    <span>{renderStatusBadge(o.status)}</span>
+                  </div>
+                )
+              }))}
+              value={
+                payload.referenceId
+                  ? {
+                      value: payload.referenceId,
+                      label: (
+                        <div className="d-flex align-items-center justify-content-between">
+                          <span>
+                            Mã: {payload.referenceId} - Khách hàng: {orders.find(o => o.orderId === payload.referenceId)?.fullName}
+                          </span>
+                          <span>
+                            {renderStatusBadge(orders.find(o => o.orderId === payload.referenceId)?.status)}
+                          </span>
+                        </div>
+                      )
+                    }
+                  : null
+              }
+              onChange={(selected) =>
+                onChange({ ...payload, referenceId: selected ? selected.value : null })
+              }
+              placeholder="Tìm kiếm và chọn đơn..."
+              isClearable
             />
           </Form.Group>
 
+
+          {/* Ghi chú */}
           <Form.Group className="mb-3">
             <Form.Label>Ghi chú</Form.Label>
             <Form.Control
@@ -103,13 +164,11 @@ const TransactionModal = ({ show, onHide, payload, onChange, onSubmit, variants 
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={onHide}>
-          Hủy
-        </Button>
+        <Button variant="secondary" onClick={onHide}>Hủy</Button>
         <Button
           variant="success"
           onClick={onSubmit}
-          disabled={!payload.variantId} // Bắt buộc chọn variant
+          disabled={!payload.variantId} // bắt buộc chọn biến thể
         >
           Thực hiện
         </Button>

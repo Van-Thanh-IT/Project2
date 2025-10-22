@@ -12,6 +12,12 @@ export const getAllHomeProducts = async () => {
   return res.data;
 };
 
+// Lấy sản phẩm nổi bật 
+export const  getTopSellingProducts = async () => {
+  const res = await axiosClient.get("/home/product/top-selling", { requiresAuth: false });
+  return res.data;
+};
+
 export const getProductDetail = async (slug) => {
   const res = await axiosClient.get(`/home/products/${slug}`, { requiresAuth: false });
   return res.data;

@@ -3,8 +3,9 @@ import { getInfo } from "../../services/UserService";
 import { getOrderByUser } from "../../services/OrderService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Table, Button, Modal, Badge } from "react-bootstrap";
+import { Button, Badge, Spinner } from "react-bootstrap";
 import team from "../../assets/images/team.jpg";
+import UserOrdersModal from "../../components/modal/UserOrdersModal";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -35,7 +36,7 @@ const Profile = () => {
           setMessages("");
         }
       } catch (error) {
-        navigate("/login"); // tự động redirect nếu token hết hạn
+        navigate("/login");
       } finally {
         setLoading(false);
       }
@@ -44,11 +45,22 @@ const Profile = () => {
     fetchUser();
   }, [navigate]);
 
+ const handleLogout = () => {
+    if (!window.confirm("Bạn có chắc muốn đăng xuất không?")) return;
+    localStorage.removeItem("token");
+    toast.info("Đã đăng xuất!");
+    
+    // 🔔 Phát sự kiện để Header biết
+    window.dispatchEvent(new Event("logout"));
+
+    navigate("/login");
+  };
+
+
   const handleViewOrders = async () => {
     if (!user?.userId) return;
     try {
       const data = await getOrderByUser(user.userId);
-      console.log(data);
       setOrders(data || []);
       setShowOrdersModal(true);
     } catch (err) {
@@ -57,97 +69,100 @@ const Profile = () => {
     }
   };
 
-  const renderStatusBadge = (status) => {
-    switch (status) {
-      case "PENDING":
-        return <Badge bg="secondary">Đang chờ xác nhận</Badge>;
-      case "CONFIRMED":
-        return <Badge bg="info">Đã xác nhận</Badge>;
-      case "SHIPPED":
-        return <Badge bg="warning">Đang vận chuyển</Badge>;
-      case "DELIVERED":
-        return <Badge bg="success">Đã giao</Badge>;
-      case "CANCELLED":
-        return <Badge bg="danger">Đã hủy</Badge>;
-      default:
-        return <Badge bg="secondary">Không hợp lệ</Badge>;
-    }
-  };
+  if (loading)
+    return (
+      <div className="d-flex justify-content-center align-items-center mt-5">
+        <Spinner animation="border" variant="primary" />
+        <span className="ms-2">Đang tải...</span>
+      </div>
+    );
 
-  if (loading) return <div className="container mt-4">Loading...</div>;
   if (messages) return <div className="container mt-4">{messages}</div>;
 
   return (
-    <div className="container mt-4">
-      <div className="card p-4 shadow-sm mb-4 d-flex align-items-center" style={{ maxWidth: 600, margin: "0 auto" }}>
-        {/* Ảnh đại diện */}
-        <div className="profile-avatar mb-3">
-          <img
-            src={team || "/images/default-avatar.png"}
-            alt="avatar"
-            className="rounded-circle"
-            style={{ width: 300, height: 300, objectFit: "cover", border: "5px solid #0a0909ff" }}
-          />
-        </div>
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <div className="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div className="card-header text-center bg-gradient-primary text-white py-5">
+              <div
+                className="mx-auto mb-3"
+                style={{
+                  width: 150,
+                  height: 150,
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: "5px solid #fff",
+                  boxShadow: "0 0 15px rgba(0,0,0,0.2)",
+                }}
+              >
+                <img
+                  src={team || "/images/default-avatar.png"}
+                  alt="avatar"
+                  className="w-100 h-100"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+              <h3 className="mb-0 text-black">{user.fullName}</h3>
+              <p className="mb-0 text-black">{user.email}</p>
+            </div>
 
-        {/* Thông tin */}
-        <p><strong>Họ tên:</strong> {user.fullName}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Số điện thoại:</strong> {user.phone}</p>
-        <p>
-          <strong>Trạng thái:</strong>{" "}
-          {user.active ? <span className="text-success">Đã kích hoạt</span> : <span className="text-danger">Chưa kích hoạt</span>}
-        </p>
-        <p>
-          <strong>Vai trò:</strong>{" "}
-          {user.roles.map((role) => (
-            <span key={role.roleId} className="badge bg-primary me-1">
-              {role.roleName}
-            </span>
-          ))}
-        </p>
+            <div className="card-body">
+              <div className="row mb-3">
+                <div className="col-6">
+                  <h6 className="text-muted">Số điện thoại</h6>
+                  <p>{user.phone || "Chưa cập nhật"}</p>
+                </div>
+                <div className="col-6">
+                  <h6 className="text-muted">Trạng thái</h6>
+                  <p className={user.active ? "text-success" : "text-danger"}>
+                    {user.active ? "Đã kích hoạt" : "Chưa kích hoạt"}
+                  </p>
+                </div>
+              </div>
 
-        {/* Nút hành động */}
-        <div className="d-flex gap-2 mt-3">
-          <Button variant="primary" onClick={handleViewOrders}>Xem đơn hàng</Button>
+              <div className="mb-3">
+                <h6 className="text-muted">Vai trò</h6>
+                <div>
+                  {user.roles.map((role) => (
+                    <Badge key={role.roleId} bg="primary" className="me-2">
+                      {role.roleName}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              <div className="text-center mt-4 d-flex flex-column gap-2">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={handleViewOrders}
+                  className="rounded-pill px-5 shadow-sm"
+                >
+                  📦 Xem đơn hàng
+                </Button>
+
+                {/* 🔒 Nút Đăng xuất */}
+                <Button
+                  variant="danger"
+                  size="lg"
+                  onClick={handleLogout}
+                  className="rounded-pill px-5 shadow-sm"
+                >
+                  🚪 Đăng xuất
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Modal danh sách đơn hàng */}
-      <Modal show={showOrdersModal} onHide={() => setShowOrdersModal(false)} size="lg" centered scrollable>
-        <Modal.Header closeButton>
-          <Modal.Title>Đơn hàng của bạn</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {orders.length === 0 ? (
-            <p className="text-center">Bạn chưa có đơn hàng nào.</p>
-          ) : (
-            <Table striped bordered hover responsive className="text-center">
-              <thead className="table-info">
-                <tr>
-                  <th>Mã đơn</th>
-                  <th>Trạng thái</th>
-                  <th>Tổng tiền</th>
-                  <th>Ngày đặt</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.map(order => (
-                  <tr key={order.orderId}>
-                    <td>{order.code}</td>
-                    <td>{renderStatusBadge(order.status)}</td>
-                    <td>{order.total.toLocaleString()}₫</td>
-                    <td>{new Date(order.placedAt).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowOrdersModal(false)}>Đóng</Button>
-        </Modal.Footer>
-      </Modal>
+      {/* Modal hiển thị đơn hàng */}
+      <UserOrdersModal
+        show={showOrdersModal}
+        handleClose={() => setShowOrdersModal(false)}
+        orders={orders}
+      />
     </div>
   );
 };

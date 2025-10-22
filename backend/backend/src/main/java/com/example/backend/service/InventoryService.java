@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,13 +52,12 @@ public class InventoryService {
                 .collect(Collectors.toList());
     }
 
-    //Cập nhật tồn kho (ví dụ chỉnh mức safety stock)
+    //Cập nhật tồn kho
     public InventoryResponse updateInventory(Long inventoryId, InventoryRequest request) {
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy tồn kho ID: " + inventoryId));
 
         inventory.setSafetyStock(request.getSafetyStock());
-        inventory.setQuantity(request.getQuantity());
         inventory.setUpdatedBy(request.getUpdatedBy());
 
         Inventory saved = inventoryRepository.save(inventory);
@@ -75,6 +75,7 @@ public class InventoryService {
 
         // Map từ request sang entity
         InventoryTransaction transaction = transactionMapper.toEntity(request, admin);
+        transaction.setTransactionDate(LocalDateTime.now());
         // Lưu giao dịch
         InventoryTransaction savedTransaction = transactionRepository.save(transaction);
 

@@ -28,7 +28,7 @@ public class Cart {
     LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems = new ArrayList<>();
+    List<CartItem> cartItems = new ArrayList<>();
 
 
 }

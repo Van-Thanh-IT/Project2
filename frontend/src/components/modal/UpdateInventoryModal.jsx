@@ -12,15 +12,7 @@ const UpdateInventoryModal = ({ show, onHide, inventory, onSubmit, onChange }) =
       <Modal.Body>
         <Form>
           <Form.Group className="mb-3">
-            <Form.Label>Số lượng</Form.Label>
-            <Form.Control
-              type="number"
-              value={inventory.quantity}
-              onChange={(e) => onChange({ ...inventory, quantity: parseInt(e.target.value) })}
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Safety Stock</Form.Label>
+            <Form.Label>Số lượng ở mức cảnh báo</Form.Label>
             <Form.Control
               type="number"
               value={inventory.safetyStock}

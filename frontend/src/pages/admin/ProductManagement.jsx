@@ -6,6 +6,7 @@ import ProductModal from "../../components/modal/ProductModal";
 import ProductImageModal from "../../components/modal/ProductImageModal";
 import ProductVariantModal from "../../components/modal/ProductVariantModal";
 import { toast } from "react-toastify";
+import ProductDetailModal from "../../components/modal/ProductDetailModal";
 
 function ProductManagement() {
 
@@ -16,6 +17,7 @@ function ProductManagement() {
   const [categories, setCategories] = useState([]);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showVariantModal, setShowVariantModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -80,6 +82,17 @@ function ProductManagement() {
 
   const handleCloseModal = () => setShowModal(false);
 
+    // hàm xử lý
+  const handleShowDetail = (product) => {
+    setSelectedProduct(product);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setSelectedProduct(null);
+    setShowDetailModal(false);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -112,6 +125,7 @@ function ProductManagement() {
   };
 
   const handleDelete = async (productId, isActive) => {
+    if(!window.confirm("Bạn có chắc chẵn muốn xóa không?")) return;
     try {
       const body = isActive ? false : true;
       await softDeleteProduct(productId, { isActive: body });
@@ -150,7 +164,7 @@ function ProductManagement() {
   };
   return (
     <Container className="">
-      <h2 className="mb-4">Quản lý sản phẩm</h2>
+      <h2 className="mb-4 page-title">Quản lý sản phẩm</h2>
       <div className="d-flex justify-content-between">
         <Form.Control
           type="text"
@@ -163,19 +177,16 @@ function ProductManagement() {
       </div>
  
 
-      <div style={{ maxHeight: "500px", overflowY: "auto" }}>
-        <Table striped bordered hover  className="table-dark">
-          <thead>
+      <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+        <Table striped bordered hover className=" align-middle">
+          <thead className="table-primary" >
             <tr>
               <th>ID</th>
               <th>Tên sản phẩm</th>
-              <th>Thương hiệu</th>
-              <th>Chất liệu</th>
               <th>Danh mục</th>
               <th>Giá bán</th>
-              <th>Mô tả</th>
               <th>Trạng thái</th>
-             <th style={{ width: "220px" }}>Hành động</th>
+              <th style={{ width: "240px" }}>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -183,24 +194,32 @@ function ProductManagement() {
               <tr key={p.productId}>
                 <td>{p.productId}</td>
                 <td>{p.productName}</td>
-                <td>{p.brand}</td>
-                <td>{p.material}</td>
-                <td>{categories.find((c) => Number(c.categoryId) === Number(p.categoryId))?.categoryName || "-"}</td>
-                <td>{p.price.toLocaleString()} VNĐ</td>
-                <td>{p.description}</td>
-                <td>{p.isActive ? <span className="badge bg-success">Hoạt động</span> : <span className="badge bg-secondary">Đã xóa</span>}</td>
-                <td className="d-flex gap-2">
-                  <Button size="sm" variant="primary" onClick={() => handleShowModal(p)}>Sửa</Button>
-                  <Button size="sm" variant="warning" onClick={() => handleShowImageModal(p)}>Ảnh</Button>
-                  <Button size="sm" variant={p.isActive ? "danger" : "success"} onClick={() => handleDelete(p.productId, p.isActive)}>
-                    {p.isActive ? "Xóa" : "Khôi phục"}
-                  </Button>
-                  <Button size="sm" variant="info" onClick={() => handleShowVariantModal(p)}>Biến thể</Button>
+                <td>
+                  {categories.find((c) => Number(c.categoryId) === Number(p.categoryId))?.categoryName || "-"}
                 </td>
+                <td>{p.price.toLocaleString()} VNĐ</td>
+                <td>
+                  {p.isActive ? (
+                    <span className="badge bg-success">Hoạt động</span>
+                  ) : (
+                    <span className="badge bg-secondary">Đã xóa</span>
+                  )}
+                </td>
+              <td className="d-flex flex-wrap gap-2 justify-content-between">
+                <Button size="sm" className="flex-fill" variant="info" onClick={() => handleShowDetail(p)}>👁 Xem chi tiết</Button>
+                <Button size="sm" className="flex-fill" variant="primary" onClick={() => handleShowModal(p)}>✏ Sửa</Button>
+                <Button size="sm" className="flex-fill" variant="warning" onClick={() => handleShowImageModal(p)}>Ảnh</Button>
+                <Button size="sm" className="flex-fill" variant={p.isActive ? "danger" : "success"} onClick={() => handleDelete(p.productId, p.isActive)}>
+                  {p.isActive ? "Xóa" : "Khôi phục"}
+                </Button>
+                <Button size="sm" className="flex-fill" variant="secondary" onClick={() => handleShowVariantModal(p)}>Biến thể</Button>
+              </td>
+
               </tr>
             ))}
           </tbody>
         </Table>
+
       </div>
 
       {/* modal product */}
@@ -209,6 +228,9 @@ function ProductManagement() {
       <ProductImageModal show={showImageModal} onHide={handleCloseImageModal} product={selectedProduct} />
       {/* modal product variant */}
       <ProductVariantModal show={showVariantModal} onHide={handleCloseVariantModal} product={selectedProduct} />
+      
+      <ProductDetailModal show={showDetailModal} onHide={handleCloseDetailModal} product={selectedProduct}/>
+
     </Container>
   );
 }

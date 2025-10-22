@@ -30,7 +30,7 @@ public class CartItem {
     BigDecimal price;
 
     @Column(name = "image_url")
-    private String imageUrl;
+    String imageUrl;
 
     @Column(updatable = false)
     @CreationTimestamp // tự động gắn thời gian

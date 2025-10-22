@@ -40,10 +40,7 @@ public class InventoryTransaction {
     @Column(name = "created_by")
     Long createdBy;
 
-    @Column(name = "transaction_date",
-            insertable = false,
-            updatable = false,
-            columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "transaction_date")
     LocalDateTime transactionDate;
 
     String note;

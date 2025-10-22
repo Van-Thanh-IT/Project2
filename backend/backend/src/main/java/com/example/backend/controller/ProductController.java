@@ -80,7 +80,6 @@ public class ProductController {
     public APIResponse<Void> createProductImage(
             @PathVariable Long productId,
             @ModelAttribute ProductImageRequest request){
-        System.out.println("DL nhận đc từ frontend: " + productId + "req"+ request);
         productService.createProductImage(productId, request);
         return APIResponse.<Void>builder()
                 .code(200)
@@ -93,7 +92,6 @@ public class ProductController {
     public APIResponse<Void> updateProductImage(
             @PathVariable Long imageId,
             @ModelAttribute ProductImageRequest request){
-
         productService.updateProductImage(imageId, request);
         return APIResponse.<Void>builder()
                 .code(200)
@@ -158,8 +156,8 @@ public class ProductController {
 
     // delete variant
     @DeleteMapping("/variants/delete/{variantId}")
-    public APIResponse<Void> deleteProductVariant(@PathVariable Long variantId){
-        productService.deleteProductVariant(variantId);
+    public APIResponse<Void> deleteProductVariant(@PathVariable Long variantId, @RequestParam Boolean isActive){
+        productService.deleteProductVariant(variantId, isActive);
         return APIResponse.<Void>builder()
                 .code(200)
                 .messages("Xóa biến thể sản phẩm thành công!")

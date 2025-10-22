@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { login, loginWithGoogle, loginWithFacebook } from "../../services/Authentication";
+import {
+  login,
+  loginWithGoogle,
+  loginWithFacebook,
+} from "../../services/Authentication";
 import { getInfo } from "../../services/UserService";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
@@ -39,7 +43,7 @@ const Login = () => {
       }
 
       if (roles.includes("ADMIN")) navigate("/admin");
-      else navigate("/profile");
+      else navigate("/");
     } catch (err) {
       console.error(err);
       toast.error("Đã xảy ra lỗi khi lấy thông tin người dùng!");
@@ -84,9 +88,12 @@ const Login = () => {
     }
   };
 
-  const handleGoogleError = () => toast.error("Không thể đăng nhập bằng Google!");
+  const handleGoogleError = () =>
+    toast.error("Không thể đăng nhập bằng Google!");
 
   const handleFacebookResponse = async (response) => {
+    console.log("Facebook Response:", response);
+
     try {
       const res = await loginWithFacebook(response.accessToken);
       const token = res?.data?.token;
@@ -98,13 +105,15 @@ const Login = () => {
       await handleLoginSuccess(token);
     } catch (err) {
       console.error(err);
-      toast.error("Đăng nhập Facebook thất bại!");
     }
   };
 
   return (
     <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-      <div className="card shadow-lg p-5" style={{ maxWidth: 450, width: "100%" }}>
+      <div
+        className="card shadow-lg p-5"
+        style={{ maxWidth: 450, width: "100%" }}
+      >
         <h3 className="text-center mb-4">Đăng nhập</h3>
 
         {error && <div className="alert alert-danger">{error}</div>}
@@ -135,28 +144,50 @@ const Login = () => {
           </div>
 
           <div className="d-flex justify-content-between mb-3">
-           <Button variant="link" onClick={() => setShowForgotModal(true)}>
-            Quên mật khẩu?
-          </Button>
+            <Button variant="link" onClick={() => setShowForgotModal(true)}>
+              Quên mật khẩu?
+            </Button>
           </div>
 
-          <button type="submit" className="btn btn-primary w-100 mb-3" disabled={loading}>
+          <button
+            type="submit"
+            className="btn btn-primary w-100 mb-3"
+            disabled={loading}
+          >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
 
-        <div className="text-center my-3 text-muted">--- Hoặc đăng nhập với ---</div>
+        <div className="text-center my-3 text-muted">
+          --- Hoặc đăng nhập với ---
+        </div>
 
         <div className="d-flex flex-column gap-2">
-          <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
-
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+          />
           <FacebookLogin
             appId="2016734672462629"
             onSuccess={handleFacebookResponse}
-            onFail={(err) => toast.error("Đăng nhập Facebook thất bại!")}
+            onFail={() => toast.error("Đăng nhập Facebook thất bại!")}
             onProfileSuccess={handleFacebookResponse}
-            theme="light_blue" 
-            textButton="Đăng nhập với Facebook"
+            render={({ onClick }) => (
+              <button
+                onClick={onClick}
+                className="btn btn-primary w-100 d-flex align-items-center justify-content-center"
+                style={{
+                  backgroundColor: "#1877f2",
+                  border: "none",
+                  fontWeight: "500",
+                  borderRadius: "6px",
+                  padding: "10px",
+                }}
+              >
+                <i className="bi bi-facebook me-2 fs-5"></i>
+                Đăng nhập với Facebook
+              </button>
+            )}
           />
         </div>
 
@@ -167,14 +198,13 @@ const Login = () => {
           </Link>
         </p>
       </div>
-        
-        {/* modal quên mk */}
-       <ForgotPasswordModal
+
+      {/* modal quên mk */}
+      <ForgotPasswordModal
         show={showForgotModal}
         handleClose={() => setShowForgotModal(false)}
       />
     </div>
-    
   );
 };
 

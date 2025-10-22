@@ -9,6 +9,7 @@ import {
 import CategoryModal from "../../components/modal/CategoryModal";
 import { toast } from "react-toastify";
 import "../../styles/global.scss";
+import { FaEdit, FaTrash, FaUndo } from "react-icons/fa";
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState([]);
@@ -87,6 +88,7 @@ const CategoryManagement = () => {
   };
 
   const handleToggleStatus = async (category) => {
+    if(!window.confirm("Bạn có chắc chẵn muốn xóa không?")) return;
     try {
       const res = await toggleCategoryStatus(category.categoryId, { isActive: !category.isActive });
       toast.success(res.messages);
@@ -128,7 +130,7 @@ const CategoryManagement = () => {
 
   return (
     <Container className="mt-4">
-      <h2 className="mb-3">Quản lý Danh mục</h2>
+      <h2 className="mb-3 page-title fw-bold">Quản lý Danh mục</h2>
 
       <div className="d-flex justify-content-between mb-3">
         <Form.Control
@@ -150,9 +152,9 @@ const CategoryManagement = () => {
         </Button>
       </div>
 
-      <div style={{ maxHeight: "500px", overflowY: "auto" }}>
-        <Table striped bordered hover className="table-dark">
-          <thead>
+      <div style={{ maxHeight: "550px", overflowY: "auto" }}>
+        <Table striped bordered hover >
+          <thead className="table-primary" >
             <tr>
               <th>ID</th>
               <th>Tên danh mục</th>
@@ -188,14 +190,27 @@ const CategoryManagement = () => {
                     <span className="badge bg-danger">đã xóa</span>
                   )}
                 </td>
-                <td>
-                  <Button size="sm" variant="primary" className="me-2" onClick={() => handleEdit(c)}>
-                    Sửa
-                  </Button>
-                  <Button size="sm" variant={c.isActive ? "danger" : "success"} onClick={() => handleToggleStatus(c)}>
-                    {c.isActive ? "Xóa" : "Khôi phục"}
-                  </Button>
-                </td>
+              <td className="text-nowrap d-flex " style={{width:"110px"}}>
+              <Button
+                size="sm"
+                variant="primary"
+                className="me-2 d-flex align-items-center gap-1"
+                onClick={() => handleEdit(c)}
+              >
+                <FaEdit /> Sửa
+              </Button>
+
+              <Button
+                size="sm"
+                variant={c.isActive ? "danger" : "success"}
+                className="d-flex align-items-center gap-1"
+                onClick={() => handleToggleStatus(c)}
+              >
+                {c.isActive ? <FaTrash /> : <FaUndo />}
+                {c.isActive ? "Xóa" : "Khôi phục"}
+              </Button>
+            </td>
+
               </tr>
             ))}
           </tbody>

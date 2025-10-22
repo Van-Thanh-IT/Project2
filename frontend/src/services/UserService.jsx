@@ -18,12 +18,6 @@ export const updateUser = async (userId, formData) => {
   return res.data;
 };
 
-// Xóa user
-export const deleteUser = async (userId) => {
-  const res = await axiosClient.delete(`/users/delete/${userId}`);
-  return res.data;
-};
-
 // Khóa/Mở khóa user
 export const toggleUserActive = async (userId) => {
   const res = await axiosClient.put(`/users/${userId}/toggle-active`);

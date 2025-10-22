@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Table, Button, Form } from "react-bootstrap";
-import { getAllUsers, updateUser, deleteUser, toggleUserActive } from "../../services/UserService";
+import { getAllUsers, updateUser,toggleUserActive } from "../../services/UserService";
 import { getOrderByUser } from "../../services/OrderService";
 import UserModal from "../../components/modal/UserModal";
-import UserOrdersModal from "../../components/modal/UserOrdersModal";
+import UserOrderModalManagement from "../../components/modal/UserOrderModalManagement";
 import { toast } from "react-toastify";
 import "../../styles/global.scss";
-import styles from "../../styles/UserManagement.module.scss";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -67,16 +66,6 @@ const UserManagement = () => {
       toast.error(err?.response?.data?.messages || "Cập nhật thất bại");
     }
   };
-  const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa người dùng này?")) return;
-    try {
-      const res = await deleteUser(id);
-      toast.success(res.messages || "Xóa thành công");
-      await fetchUsers();
-    } catch (err) {
-      toast.error(err?.response?.data?.messages || "Xóa thất bại");
-    }
-  };
   const handleToggleActive = async (id) => {
     try {
       await toggleUserActive(id);
@@ -98,7 +87,7 @@ const UserManagement = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Quản lý người dùng</h2>
+      <h2 className="page-title">Quản lý người dùng</h2>
 
       {/* Input tìm kiếm */}
       <Form.Control
@@ -110,8 +99,8 @@ const UserManagement = () => {
       />
 
       <div className="table-responsive" style={{ maxHeight: "75vh", overflowY: "auto" }}>
-        <Table striped bordered hover className={styles.table} >
-          <thead >
+        <Table bordered hover className="table">
+          <thead  className="table-primary"  >
             <tr>
               <th>ID</th>
               <th>Email</th>
@@ -139,9 +128,6 @@ const UserManagement = () => {
                 </td>
                 <td>
                   <Button variant="warning" size="sm" onClick={() => handleEdit(u)} className="me-2">Sửa</Button>
-                  {!(u.roles[0].roleName === "ADMIN") && (
-                    <Button variant="danger" size="sm" onClick={() => handleDelete(u.userId)} className="me-2">Xóa</Button>
-                  )}
                   {u.roles[0].roleName === "USER" && (
                     <Button
                       variant={u.active ? "secondary" : "success"}
@@ -149,7 +135,7 @@ const UserManagement = () => {
                       className="me-2"
                       onClick={() => handleToggleActive(u.userId)}>{u.active ? "Khóa" : "Mở khóa"}</Button>
                   )}
-                  <Button variant="info" size="sm" onClick={() => handleViewOrders(u)}>Xem đơn hàng</Button>
+                  <Button variant="info" size="sm" onClick={() => handleViewOrders(u)}>👁 Xem đơn hàng</Button>
                 </td>
               </tr>
             ))}
@@ -164,7 +150,7 @@ const UserManagement = () => {
         selectedUser={selectedUser}
       />
 
-      <UserOrdersModal
+      <UserOrderModalManagement
         show={showOrdersModal}
         handleClose={() => setShowOrdersModal(false)}
         orders={userOrders}

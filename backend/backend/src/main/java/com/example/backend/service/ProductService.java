@@ -1,8 +1,6 @@
 package com.example.backend.service;
 
-import com.cloudinary.Cloudinary;
 import com.example.backend.dto.Inter.HomeProductProjection;
-import com.example.backend.dto.Inter.ProductReviewSummary;
 import com.example.backend.dto.requset.ProductImageRequest;
 import com.example.backend.dto.requset.ProductVariantRequest;
 import com.example.backend.dto.response.ProductImageResponse;
@@ -10,7 +8,6 @@ import com.example.backend.dto.response.ProductVariantResponse;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import com.example.backend.util.Cloudinaryutil;
-import com.example.backend.util.FileUploadUtil;
 import com.example.backend.util.SlugUtil;
 import com.example.backend.dto.requset.ProductRequest;
 import com.example.backend.dto.response.ProductResponse;
@@ -53,6 +50,10 @@ public class ProductService {
         return productRepository.findAllActiveHomeProductsNative();
 
     }
+    // get home product
+    public List<HomeProductProjection> getTopSellingProducts() {
+        return productRepository.findTopSellingProductsForHome();
+    }
     // get product detal slug
     public ProductResponse getProductDetailBySlug(String slug){
         Product product = productRepository.findBySlug(slug)
@@ -94,6 +95,7 @@ public class ProductService {
         Product product = productMapper.toProduct(request);
         product.setSlug(slug);
         product.setCategory(category);
+        product.setIsActive(true);
 
         return productRepository.save(product);
     }
@@ -154,25 +156,22 @@ public class ProductService {
     //create productImage
     @Transactional
     public ProductImage createProductImage(Long productId, ProductImageRequest request) {
-        //Tìm sản phẩm
+        // Tìm sản phẩm
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm có productId: " + productId));
 
-        //Nếu là ảnh chính (isPrimary = true) → kiểm tra có ảnh chính cũ không
-        if (request.getIsPrimary() != null && request.getIsPrimary()) {
+        // Nếu là ảnh chính → kiểm tra có ảnh chính cũ chưa
+        if (Boolean.TRUE.equals(request.getIsPrimary())) {
             ProductImage existingPrimary = productImageRepository.findByProductIdAndIsPrimaryTrue(productId);
             if (existingPrimary != null) {
-                //Xóa ảnh cũ khỏi Cloudinary
-                cloudinaryutil.deleteFile(existingPrimary.getImageUrl());
-                //Xóa khỏi DB
-                productImageRepository.delete(existingPrimary);
+                throw new RuntimeException("Ảnh chính đã tồn tại, vui lòng xóa ảnh chính cũ trước khi thêm mới!");
             }
         }
 
-        // Upload ảnh mới lên Cloudinary
+        // Upload ảnh lên Cloudinary
         String imageUrl = cloudinaryutil.saveFile(request.getImage());
 
-        //Tạo entity ProductImage mới
+        // Tạo entity ProductImage mới
         ProductImage productImage = productMapper.toProductImage(request);
         productImage.setImageUrl(imageUrl);
         productImage.setProduct(product);
@@ -182,23 +181,35 @@ public class ProductService {
     }
 
 
+
     @Transactional
-    public ProductImage updateProductImage(Long imageId,ProductImageRequest request ){
+    public ProductImage updateProductImage(Long imageId, ProductImageRequest request) {
         ProductImage existingImage = productImageRepository.findById(imageId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy imageId này: "+ imageId));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy imageId này: " + imageId));
 
+        Long productId = existingImage.getProduct().getProductId();
 
-        // Xóa file cũ
+        // Nếu cập nhật thành ảnh chính → kiểm tra xem sản phẩm đã có ảnh chính khác chưa
+        if (Boolean.TRUE.equals(request.getIsPrimary())) {
+            ProductImage existingPrimary = productImageRepository.findByProductIdAndIsPrimaryTrue(productId);
+            if (existingPrimary != null && !existingPrimary.getImageId().equals(imageId)) {
+                throw new RuntimeException("Ảnh chính đã tồn tại, không thể đặt ảnh này làm ảnh chính!");
+            }
+        }
+
+        // Xóa ảnh cũ trên Cloudinary
         cloudinaryutil.deleteFile(existingImage.getImageUrl());
+
+        // Upload ảnh mới
         String imageUrl = cloudinaryutil.saveFile(request.getImage());
 
-        // upload ảnh
+        // Cập nhật thông tin ảnh
         existingImage.setImageUrl(imageUrl);
         existingImage.setIsPrimary(request.getIsPrimary());
 
         return productImageRepository.save(existingImage);
-
     }
+
 
     @Transactional
     public void deleteImage(Long imageId) {
@@ -227,16 +238,32 @@ public class ProductService {
     // Tạo variant cho product
     @Transactional
     public ProductVariant createProductVariant(Long productId, ProductVariantRequest request) {
-        // Lấy product theo ID
+        //Kiểm tra productId có tồn tại hay ko
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm có productId: " + productId));
 
+        //Kiểm tra trùng từng thuộc tính
+        if (productVariantRepository.existsByProductAndSize(product, request.getSize())) {
+            throw new RuntimeException("Kích thước này đã tồn tại cho sản phẩm!");
+        }
+        if (productVariantRepository.existsByProductAndColor(product, request.getColor())) {
+            throw new RuntimeException("Màu này đã tồn tại cho sản phẩm!");
+        }
+        if (productVariantRepository.existsByProductAndPrice(product, request.getPrice())) {
+            throw new RuntimeException("Giá này đã tồn tại cho sản phẩm!");
+        }
+        if (productVariantRepository.existsByProductAndWeight(product, request.getWeight())) {
+            throw new RuntimeException("Cân nặng này đã tồn tại cho sản phẩm!");
+        }
+
+        //Tạo biến thể mới
         ProductVariant variant = productMapper.toProductVariant(request);
         variant.setProduct(product);
         variant.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
 
         ProductVariant savedVariant = productVariantRepository.save(variant);
 
+        //Tạo bản ghi tồn kho
         Inventory inventory = new Inventory();
         inventory.setVariant(savedVariant);
         inventory.setQuantity(0);
@@ -253,8 +280,24 @@ public class ProductService {
         ProductVariant variant = productVariantRepository.findById(variantId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy variantId: " + variantId));
 
-        variant.setColor(request.getColor());
+        Product product = variant.getProduct();
+
+        // Kiểm tra trùng nhưng loại trừ chính variant đang sửa
+        if (productVariantRepository.existsByProductAndSizeAndVariantIdNot(product, request.getSize(), variantId)) {
+            throw new RuntimeException("Kích thước này đã tồn tại cho sản phẩm!");
+        }
+        if (productVariantRepository.existsByProductAndColorAndVariantIdNot(product, request.getColor(), variantId)) {
+            throw new RuntimeException("Màu này đã tồn tại cho sản phẩm!");
+        }
+        if (productVariantRepository.existsByProductAndPriceAndVariantIdNot(product, request.getPrice(), variantId)) {
+            throw new RuntimeException("Giá này đã tồn tại cho sản phẩm!");
+        }
+        if (productVariantRepository.existsByProductAndWeightAndVariantIdNot(product, request.getWeight(), variantId)) {
+            throw new RuntimeException("Cân nặng này đã tồn tại cho sản phẩm!");
+        }
+
         variant.setSize(request.getSize());
+        variant.setColor(request.getColor());
         variant.setPrice(request.getPrice());
         variant.setWeight(request.getWeight());
         variant.setIsActive(request.getIsActive());
@@ -262,13 +305,14 @@ public class ProductService {
         return productVariantRepository.save(variant);
     }
 
+
     // Xóa variant
     @Transactional
-    public void deleteProductVariant(Long variantId) {
+    public void deleteProductVariant(Long variantId, Boolean isActive) {
         ProductVariant variant = productVariantRepository.findById(variantId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy variantId: " + variantId));
-
-        productVariantRepository.delete(variant);
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể sản phẩm"));
+        variant.setIsActive(isActive);
+        productVariantRepository.save(variant);
     }
 
 

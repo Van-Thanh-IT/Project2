@@ -23,12 +23,18 @@ public class ReviewController {
                 .build();
     }
 
-    //sửa đánh giá
+    /**
+     * Update a review
+     *
+     * @param reviewId the review's ID
+     * @param request the updated review
+     * @return an API response containing a success message
+     */
     @PutMapping("/{reviewId}/update")
-    public APIResponse<Void> update(@PathVariable Long reviewId,@RequestBody ReviewRequest request) {
-        reviewService.update(reviewId,request);
+    public APIResponse<Void> updateReview(@PathVariable Long reviewId, @RequestBody ReviewRequest request) {
+        reviewService.updateReview(reviewId, request);
         return APIResponse.<Void>builder()
-                .messages("Bạn đã sửa đánh giá thành công!")
+                .messages("Review updated successfully")
                 .build();
     }
 

@@ -46,6 +46,7 @@ export const updateProductImage = async (imageId, formData) => {
   const res = await axiosClient.put(`/admin/products/images/update/${imageId}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+  console.log("dl nhận đc: ", formData);
   return res.data;
 };
 
@@ -82,7 +83,7 @@ export const updateProductVariant = async (variantId, formData) => {
 };
 
 // Xóa variant
-export const deleteProductVariant = async (variantId) => {
-  const res = await axiosClient.delete(`/admin/products/variants/delete/${variantId}`);
+export const deleteProductVariant = async (variantId, isActive) => {
+  const res = await axiosClient.delete(`/admin/products/variants/delete/${variantId}?isActive=${isActive}`);
   return res.data;
 };

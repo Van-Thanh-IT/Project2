@@ -30,14 +30,6 @@ public class OrderController {
        List< OrderResponse> response = orderService.getAllOrders();
        return APIResponse.success(response);
     }
-//
-//    // Lấy chi tiết đơn hàng
-//    @GetMapping("/{orderId}")
-//    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Integer orderId) {
-//        OrderResponse response = orderService.getOrderById(orderId);
-//        return ResponseEntity.ok(response);
-//    }
-//
     // Cập nhật trạng thái đơn hàng
     @PutMapping("/{orderId}/status")
     public APIResponse<Void> updateOrderStatus(
