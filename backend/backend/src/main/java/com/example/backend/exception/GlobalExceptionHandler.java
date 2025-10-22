@@ -1,6 +1,4 @@
 package com.example.backend.exception;
-
-import ch.qos.logback.core.model.processor.ModelHandlerException;
 import com.example.backend.dto.response.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
