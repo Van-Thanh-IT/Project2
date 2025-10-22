@@ -1,14 +1,9 @@
 HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
+.mvn/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-# Ignore Spring Boot config files
-src/main/resources/application.properties
-src/main/resources/application.yml
-
-### STS ###
+# Ignore IDE files
 .apt_generated
 .classpath
 .factorypath
@@ -16,22 +11,22 @@ src/main/resources/application.yml
 .settings
 .springBeans
 .sts4-cache
-
-### IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
+.vscode
 
-### NetBeans ###
+# Build output (bỏ qua target nhưng vẫn giữ jar)
+target/
+!target/*.jar
+
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+/build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
-.vscode/
