@@ -71,6 +71,10 @@ public class VnpayService {
         String vnp_ExpireDate = expire.format(formatter);
         vnp_Params.put("vnp_ExpireDate", vnp_ExpireDate);
 
+        System.out.println("Create: " + vnp_CreateDate);
+        System.out.println("Expire: " + vnp_ExpireDate);
+
+
         List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
         Collections.sort(fieldNames);
 
